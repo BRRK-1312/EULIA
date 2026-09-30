@@ -28,7 +28,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items
 .btn.on::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink);margin-right:7px;vertical-align:1px}
 .btn kbd{font:inherit;font-size:11px;color:var(--dim);margin-left:5px}
 .bar{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-top:12px}
-.stage{position:relative;--ar:0.7067;width:min(100%,calc(84vh * var(--ar)));aspect-ratio:var(--ar);margin-inline:auto;background:var(--paper);box-shadow:0 1px 2px rgba(30,33,66,.12),0 10px 30px rgba(30,33,66,.10)}
+.stage{position:relative;--ar:1.9912;width:min(100%,calc(84vh * var(--ar)));aspect-ratio:var(--ar);margin-inline:auto;background:var(--paper);box-shadow:0 1px 2px rgba(30,33,66,.12),0 10px 30px rgba(30,33,66,.10)}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ovl{cursor:default}
 .status{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--dim);font-size:12px;margin-top:10px;font-variant-numeric:tabular-nums;justify-content:center}
@@ -90,8 +90,8 @@ canvas.panel{width:100%;display:block;background:var(--paper)}
 <main>
   <section style="min-width:0">
     <div class="stage" id="stage">
-      <canvas id="paint" width="1272" height="1800"></canvas>
-      <canvas id="ovl" width="1272" height="1800" aria-label="Oihala"></canvas>
+      <canvas id="paint" width="1800" height="904"></canvas>
+      <canvas id="ovl" width="1800" height="904" aria-label="Oihala"></canvas>
       <div class="loading" id="loading"><b id="ld-t">Garuna kargatzen</b><span class="lbar"><i id="ld-bar"></i></span><small id="ld-s">138.639 neurona · 15.091.983 konexio · 35 MB</small>
         <div id="ld-pick" hidden style="display:flex;flex-direction:column;gap:8px;align-items:center;max-width:34ch">
           <small>Ez dira garun-fitxategiak aurkitu. Aukeratu biak: <b style="font-size:inherit">eulia_garuna_0.js</b> eta <b style="font-size:inherit">eulia_garuna_1.js</b><br>No encuentro los archivos del cerebro. Elige los dos · Choose both brain files</small>
@@ -110,14 +110,14 @@ canvas.panel{width:100%;display:block;background:var(--paper)}
     <div class="sizes">
       <label for="p-size" data-i="size">Neurria</label>
       <select id="p-size">
-        <option value="1272x1800" data-i="size_poster" selected>Kartela, bertikala</option>
+        <option value="1272x1800" data-i="size_poster">Kartela, bertikala</option>
         <option value="1800x1272" data-i="size_poster_h">Kartela, horizontala</option>
         <option value="1400x1400" data-i="size_square">Karratua</option>
         <option value="1600x1000" data-i="size_wide">Leihoa 16:10</option>
-        <option value="1800x904" data-i="size_pano">Panoramikoa 2:1</option>
+        <option value="1800x904" data-i="size_pano" selected>Panoramikoa 2:1</option>
         <option value="custom" data-i="size_custom">Neurri librea</option>
       </select>
-      <span id="custom-size" hidden><input id="p-w" type="number" min="600" max="2400" step="8" value="1272" aria-label="W"> × <input id="p-h" type="number" min="600" max="2400" step="8" value="1800" aria-label="H"> px</span>
+      <span id="custom-size" hidden><input id="p-w" type="number" min="600" max="2400" step="8" value="1800" aria-label="W"> × <input id="p-h" type="number" min="600" max="2400" step="8" value="904" aria-label="H"> px</span>
       <button class="btn" id="size-apply" type="button" data-i="apply">Aplikatu</button>
     </div>
     <p class="hint" data-i="hint"></p>
@@ -384,7 +384,7 @@ function setPoi(B,idx,hz){for(const i of idx)B.poi[i]=hz}
 </script>
 <script>
 // ---------- World ----------
-let W=1272,H=1800,DS=4,LW=W/DS,LH=H/DS,SG=8,SW=W/SG,SH=H/SG;
+let W=1800,H=904,DS=4,LW=W/DS,LH=H/DS,SG=8,SW=W/SG,SH=H/SG;
 const paint=document.getElementById('paint'),pc=paint.getContext('2d');
 const ovl=document.getElementById('ovl'),oc=ovl.getContext('2d');
 const low=document.createElement('canvas');low.width=LW;low.height=LH;const lc=low.getContext('2d',{willReadFrequently:true});
@@ -501,7 +501,7 @@ const OBS={clock:0,start:new Date(),stop:null,labels:[],dash:0};
 let TU=26,LBL=15,OBS_TITLE_H=140;const OBS_FONT='"Helvetica Neue",Helvetica,Arial,sans-serif';
 const obsOn=()=>P.pal==='obs';
 // type sizes follow the sheet width (Marchetti's title runs at ~2% of the sheet width)
-function layoutTitle(){TU=Math.round(W*.022);LBL=Math.max(14,Math.round(W*.0125));OBS_TITLE_H=Math.round(TU*5.4)}
+function layoutTitle(){const ref=Math.min(W,H*1.414);TU=Math.round(ref*.022);LBL=Math.max(14,Math.round(ref*.0125));OBS_TITLE_H=Math.round(TU*5.4)}
 layoutTitle();
 function fmtDur(ms){const s=Math.round(ms/1000),h=s/3600|0,m=(s%3600)/60|0,x=String(s%60).padStart(2,'0');
   return h?`${h}h.${m}m.${x}s.`:m?`${m}m.${x}s.`:`${x}s.`}
@@ -839,7 +839,7 @@ try{
 await loadBrain(p=>{document.getElementById('ld-bar').style.width=(p*100).toFixed(0)+'%';document.getElementById('ld-t').textContent=LD[LANG][p<.6?0:p<.9?1:2]});
 }catch(err){document.getElementById('ld-t').textContent=LD[LANG][3];document.getElementById('ld-s').textContent=String(err.message||err);return}
 await new Promise(r=>setTimeout(r,30));
-B=buildBrain(778);resizeWorld(1272,1800);
+B=buildBrain(778);resizeWorld(1800,904);
 // a starting scene: three sugar drops so the fly has something to want
 startFlight('enter');
 applyLang();drawStatus();
