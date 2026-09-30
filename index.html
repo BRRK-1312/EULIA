@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="eu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EULIA Behaketa</title>
+<style>
+/* Layout: the page is the poster wall — the observation sheet large on the left, the observer's notes on the right; one column on phones.
+   Single deliberate light look taken from Marchetti's 1967 sheet: off-white paper, navy dashes, green Helvetica. */
+:root{
+  --wall:#ecebe4; --paper:#f6f5f0; --ink:#1e2142; --green:#3f8f3c; --dim:#6f7a6c; --rule:#1e2142;
+  --fg:var(--ink); --verm:var(--green); --gold:var(--ink); --sugar:var(--green);
+  --f:"Helvetica Neue",Helvetica,Arial,"Nimbus Sans","Liberation Sans",sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--wall);color:var(--green);font:14px/1.45 var(--f);padding-inline:16px;padding-block:0 28px;box-sizing:border-box;margin:0}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+.dash{border:0;height:2px;margin:0;background:repeating-linear-gradient(90deg,var(--rule) 0 9px,transparent 9px 16px)}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding-block:18px 12px}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand h1{font:400 30px/1 var(--f);margin:0;color:var(--green);letter-spacing:-.01em}
+.brand p{margin:0;font-style:italic;font-size:12px;color:var(--green)}
+.lang{display:flex;gap:10px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start;margin-top:14px}
+@media (max-width:980px){main{grid-template-columns:minmax(0,1fr)}}
+.btn{font:400 14px/1.2 var(--f);color:var(--green);background:none;border:0;padding:2px 0;cursor:pointer;border-bottom:1px dashed transparent}
+.btn:hover{border-bottom-color:var(--green)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.on::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink);margin-right:7px;vertical-align:1px}
+.btn kbd{font:inherit;font-size:11px;color:var(--dim);margin-left:5px}
+.bar{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-top:12px}
+.stage{position:relative;--ar:0.7067;width:min(100%,calc(84vh * var(--ar)));aspect-ratio:var(--ar);margin-inline:auto;background:var(--paper);box-shadow:0 1px 2px rgba(30,33,66,.12),0 10px 30px rgba(30,33,66,.10)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ovl{cursor:default}
+.status{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--dim);font-size:12px;margin-top:10px;font-variant-numeric:tabular-nums;justify-content:center}
+.status b{color:var(--ink);font-weight:400}
+.hint{color:var(--dim);margin:6px 0 0;font-size:12px;text-align:center}
+.sizes{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center;margin-top:14px;font-size:13px}
+.sizes label{color:var(--green)}
+select,input[type=number]{background:var(--paper);color:var(--ink);border:0;border-bottom:1px dashed var(--ink);font:13px var(--f);padding:3px 2px;border-radius:0}
+input[type=number]{width:74px;font-variant-numeric:tabular-nums}
+.source{margin:26px auto 0;max-width:72ch;display:flex;flex-direction:column;gap:8px}
+.source h3{font:400 20px/1.1 var(--f);margin:10px 0 0;color:var(--green)}
+aside{display:flex;flex-direction:column;gap:18px;min-width:0}
+.blk{display:flex;flex-direction:column;gap:8px}
+.blk h2{font:400 20px/1.1 var(--f);margin:10px 0 0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;color:var(--green)}
+.blk h2 small{font-size:11px;font-style:italic;color:var(--dim)}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) 44px;gap:8px;align-items:center}
+.row2{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:8px;align-items:center}
+.row label,.row2 label{font-size:12px;color:var(--green)}
+.row output{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-size:12px}
+input[type=range]{width:100%;accent-color:var(--ink)}
+canvas.panel{width:100%;display:block;background:var(--paper)}
+#raster{image-rendering:pixelated;height:300px}
+.legend{display:none}
+.meter{display:grid;grid-template-columns:104px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:12px;color:var(--green)}
+.meter .t{height:2px;position:relative;overflow:hidden;background:repeating-linear-gradient(90deg,rgba(30,33,66,.25) 0 5px,transparent 5px 9px)}
+.meter .t span{position:absolute;inset:0 auto 0 0;background:var(--ink);width:0}
+.meter .v{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.pill{font:400 16px/1 var(--f);color:var(--ink);font-style:italic}
+.note{color:var(--dim);font-size:12px;line-height:1.5;margin:0}
+.types{display:flex;flex-wrap:wrap;gap:4px 12px;min-height:40px;align-content:flex-start;font-size:12px}
+.types span b{font-weight:400;color:var(--ink)}
+.types span em{font-style:normal;color:var(--green);margin-left:4px}
+.loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--paper);text-align:center;padding:16px}
+.loading b{font:400 24px/1.1 var(--f);color:var(--green)}
+.loading small{color:var(--dim);font-size:12px}
+.lbar{width:min(320px,80%);height:2px;position:relative;background:repeating-linear-gradient(90deg,rgba(30,33,66,.25) 0 6px,transparent 6px 11px)}
+.lbar i{position:absolute;inset:0 auto 0 0;background:var(--ink);width:0}
+.modal{position:fixed;inset:0;background:rgba(236,235,228,.94);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal .box{display:flex;flex-direction:column;gap:12px;max-width:min(900px,100%);max-height:100%}
+.modal img{max-width:100%;max-height:78vh;height:auto;display:block;margin-inline:auto;box-shadow:0 10px 30px rgba(30,33,66,.14)}
+.modal .acts{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;justify-content:center}
+.modal a.btn{text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="brand">
+    <h1>EULIA</h1>
+    <p data-i="sub">Konektoma pintzel gisa · B_RR_K_</p>
+  </div>
+  <div class="lang" role="group" aria-label="Hizkuntza">
+    <button class="btn" id="lang-eu" type="button">euskara</button>
+    <button class="btn" id="lang-es" type="button">castellano</button>
+    <button class="btn" id="lang-en" type="button">english</button>
+  </div>
+</header>
+<hr class="dash">
+
+<main>
+  <section style="min-width:0">
+    <div class="stage" id="stage">
+      <canvas id="paint" width="1272" height="1800"></canvas>
+      <canvas id="ovl" width="1272" height="1800" aria-label="Oihala"></canvas>
+      <div class="loading" id="loading"><b id="ld-t">Garuna kargatzen</b><span class="lbar"><i id="ld-bar"></i></span><small id="ld-s">138.639 neurona · 15.091.983 konexio · 35 MB</small>
+        <div id="ld-pick" hidden style="display:flex;flex-direction:column;gap:8px;align-items:center;max-width:34ch">
+          <small>Ez dira garun-fitxategiak aurkitu. Aukeratu biak: <b style="font-size:inherit">eulia_garuna_0.js</b> eta <b style="font-size:inherit">eulia_garuna_1.js</b><br>No encuentro los archivos del cerebro. Elige los dos · Choose both brain files</small>
+          <label class="btn" for="ld-file" style="cursor:pointer">↑ eulia_garuna_0.js + eulia_garuna_1.js</label>
+          <input id="ld-file" type="file" accept=".js" multiple style="position:absolute;width:1px;height:1px;opacity:0">
+          <small id="ld-pmsg"></small>
+        </div></div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="bar" style="justify-content:center">
+      <button class="btn on" id="run" type="button"><span data-i="pause">Gelditu</span><kbd>␣</kbd></button>
+      <button class="btn" id="clear" type="button" data-i="clear">Behaketa berria</button>
+      <button class="btn" id="export" type="button" data-i="export">PNG</button>
+      <button class="btn on" id="show" type="button"><span data-i="overlay">Eulia</span><kbd>H</kbd></button>
+    </div>
+    <div class="sizes">
+      <label for="p-size" data-i="size">Neurria</label>
+      <select id="p-size">
+        <option value="1272x1800" data-i="size_poster" selected>Kartela, bertikala</option>
+        <option value="1800x1272" data-i="size_poster_h">Kartela, horizontala</option>
+        <option value="1400x1400" data-i="size_square">Karratua</option>
+        <option value="1600x1000" data-i="size_wide">Leihoa 16:10</option>
+        <option value="1800x904" data-i="size_pano">Panoramikoa 2:1</option>
+        <option value="custom" data-i="size_custom">Neurri librea</option>
+      </select>
+      <span id="custom-size" hidden><input id="p-w" type="number" min="600" max="2400" step="8" value="1272" aria-label="W"> × <input id="p-h" type="number" min="600" max="2400" step="8" value="1800" aria-label="H"> px</span>
+      <button class="btn" id="size-apply" type="button" data-i="apply">Aplikatu</button>
+    </div>
+    <p class="hint" data-i="hint"></p>
+    <div class="source">
+      <hr class="dash">
+      <h3 data-i="src_h">Garuna</h3>
+      <p class="note" data-i="honest"></p>
+      <p class="note" data-i="cite"></p>
+    </div>
+  </section>
+
+  <aside>
+    <div class="blk">
+      <h2><span data-i="behavior">Jokabidea</span><span class="pill" id="beh">—</span></h2>
+      <div id="meters"></div>
+    </div>
+    <hr class="dash">
+    <div class="blk">
+      <h2><span data-i="brain">Garuna</span><small id="ncount"></small></h2>
+      <canvas class="panel" id="raster" width="300" height="316"></canvas>
+      <div class="legend" id="legend"></div>
+      <p class="note" data-i="raster_note"></p>
+      <div class="types" id="types" aria-live="off"></div>
+      <p class="note" data-i="types_note"></p>
+    </div>
+    <hr class="dash">
+    <div class="blk">
+      <h2><span data-i="eye">Begia</span><small data-i="eye_note">2 × 61 omatidio</small></h2>
+      <canvas class="panel" id="eye" width="300" height="136"></canvas>
+    </div>
+    <hr class="dash">
+    <div class="blk">
+      <h2><span data-i="chem">Kimika</span><small data-i="hz">Hz</small></h2>
+      <div id="chem"></div>
+    </div>
+    <hr class="dash">
+    <div class="blk">
+      <h2><span data-i="params">Parametroak</span></h2>
+      <div class="row"><label for="p-speed" data-i="speed">Abiadura</label><input id="p-speed" type="range" min="0.25" max="3" step="0.25" value="1"><output id="o-speed">1×</output></div>
+      <div class="row"><label for="p-brush" data-i="brush">Marra</label><input id="p-brush" type="range" min="0.5" max="6" step="0.5" value="2"><output id="o-brush">2</output></div>
+      <div class="row"><label for="p-photo" data-i="photo">Ikusmena</label><input id="p-photo" type="range" min="0" max="2" step="0.1" value="1"><output id="o-photo">1.0</output></div>
+      <div class="row"><label for="p-noise" data-i="noise">Zarata</label><input id="p-noise" type="range" min="0" max="2" step="0.1" value="1"><output id="o-noise">1.0</output></div>
+      <div class="row2"><label for="p-seed" data-i="seed">Hazia</label><input id="p-seed" type="number" min="1" max="999999" value="778"><button class="btn" id="newbrain" type="button" data-i="newbrain">Berria</button></div>
+      <p class="note" data-i="seed_note"></p>
+    </div>
+  </aside>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="box">
+    <img id="m-img" alt="EULIA PNG">
+    <div class="acts">
+      <a class="btn" id="m-dl" download="eulia.png" href="#" data-i="save">Gorde PNG</a>
+      <button class="btn" id="m-close" type="button" data-i="close">Itxi</button>
+      <span class="note" data-i="save_hint"></span>
+    </div>
+  </div>
+</div>
+
+<script>const CONNECTOME={"n":138639,"nedges":15091983,"S":{"sugar":{"L":[0,1,2,4,8,10,11,12,16,17,18,20,23,25,27,28,30,31,32,33,35,36,37,40,43,45,49,50,51,52,53,54,56],"R":[3,5,6,7,9,13,14,15,19,21,22,24,26,29,34,38,39,41,42,44,46,47,48,55]},"bitter":{"L":[57,59,61,62,63,65,66,68,74,75,76,78,79,81,85,86,87,89,92,97,98],"R":[58,60,64,67,69,70,71,72,73,77,80,82,83,84,88,90,91,93,94,95,96]},"loom":{"L":[695,696,698,702,703,704,705,708,709,713,715,717,720,726,727,728,729,730,734,735,736,737,738,741,747,749,750,751,752,753,755,758,759,760,761,763,765,767,770,772,774,775,776,777,778,780,781,782,790,793,794,797,798,799,800,801,802,805,806,807,809,810,816,818,823,824,825,826,828,830,831,832,834,837,839,840,842,843,846,847,848,850,851,852,854,861,862,863,864,865,866,872,873,875,876,877,878,881,882,883,887,888,889,891,892,895,896,898,900,901,903,907,909,912,913,915,916,918,922,923,926,927,928,929,933,934,938,939,940,945,946,947,951,954,955,956,958,959,960,963,964,973,974,975,976,979,982,983,984,985,987,989,990,992,993,995,996,1000,1001,1002,1004,1006],"R":[694,697,699,700,701,706,707,710,711,712,714,716,718,719,721,722,723,724,725,731,732,733,739,740,742,743,744,745,746,748,754,756,757,762,764,766,768,769,771,773,779,783,784,785,786,787,788,789,791,792,795,796,803,804,808,811,812,813,814,815,817,819,820,821,822,827,829,833,835,836,838,841,844,845,849,853,855,856,857,858,859,860,867,868,869,870,871,874,879,880,884,885,886,890,893,894,897,899,902,904,905,906,908,910,911,914,917,919,920,921,924,925,930,931,932,935,936,937,941,942,943,944,948,949,950,952,953,957,961,962,965,966,967,968,969,970,971,972,977,978,980,981,986,988,991,994,997,998,999,1003,1005,1007]},"odor":{"L":[100,102,103,104,106,108,109,110,113,117,119,120,121,122,123,126,128,130,135,140,141,149,151,152,153,154,155,156,159,162,163,166,167,168,171,172,173,174,175,178,182,183,184,185,189,191,192,193,196,197,198,199,202,203,206,207,209,212,213,215,216,220,223,224,225,226,227,230,231,232,234,237,238,239,240,244,245,246,249,252,253,254,256,258],"R":[99,101,105,107,111,112,114,115,116,118,124,125,127,129,131,132,133,134,136,137,138,139,142,143,144,145,146,147,148,150,157,158,160,161,164,165,169,170,176,177,179,180,181,186,187,188,190,194,195,200,201,204,205,208,210,211,214,217,218,219,221,222,228,229,233,235,236,241,242,243,247,248,250,251,255,257,259,260]},"jo_ce":{"L":[261,262,263,264,265,266,269,270,272,275,277,280,283,284,286,291,292,293,295,296,297,298,300,303,305,306,307,310,313,318,319,321,326,328,329,331,332,334,335,336,337,341,342,345,347,348,349,350,353,354,355,356,361,362,364,365,367,368,369,370,375,377,378,380,381,384,388,390,391,395,396,399,401,404,409,410,411,412,413,416,419,421,422,423,424,425,427,428,429,431,433,435,437,438,439,440,441,445,447,448,450,451,452,454,455,456,458,460,461,463,465,467,470,472,477,479,481,482,483,484,487,488,489,490,491,492,493,494,495,496,498,501,503,505,506,508,511,513,514,515,516,517,518,519,521,522,524,525,526,527,529,531,536,539,541,542,543,544,546,547,548,551,553,554,555,556,557,558,560,562,563,566,567,570,571,572,576,578,590,593,595,597,598,600,601,602,603,604,605,606,609,613,617,620,621,623,625,632,633,637,641,643,646,647,648,649,651,657,658,660,664,665,666,667,668,670,672,674,678,679,680,683,684,685,688,689,690,692,693],"R":[267,268,271,273,274,276,278,279,281,282,285,287,288,289,290,294,299,301,302,304,308,309,311,312,314,315,316,317,320,322,323,324,325,327,330,333,338,339,340,343,344,346,351,352,357,358,359,360,363,366,371,372,373,374,376,379,382,383,385,386,387,389,392,393,394,397,398,400,402,403,405,406,407,408,414,415,417,418,420,426,430,432,434,436,442,443,444,446,449,453,457,459,462,464,466,468,469,471,473,474,475,476,478,480,485,486,497,499,500,502,504,507,509,510,512,520,523,528,530,532,533,534,535,537,538,540,545,549,550,552,559,561,564,565,568,569,573,574,575,577,579,580,581,582,583,584,585,586,587,588,589,591,592,594,596,599,607,608,610,611,612,614,615,616,618,619,622,624,626,627,628,629,630,631,634,635,636,638,639,640,642,644,645,650,652,653,654,655,656,659,661,662,663,669,671,673,675,676,677,681,682,686,687,691]},"v_obj":{"L":[1011,1012,1015,1016,1017,1018,1019,1020,1024,1027,1028,1029,1030,1031,1035,1036,1037,1040,1043,1046,1047,1048,1049,1050,1052,1054,1056,1059,1061,1062,1065,1066,1067,1068,1069,1073,1075,1078,1080,1086,1091,1092,1093,1095,1097,1098,1099,1100,1103,1106,1109,1110,1113,1118,1122,1124,1125,1126,1129,1131,1132,1133,1136,1137,1141,1144,1145,1149,1151,1153,1154,1155,1157,1158,1161,1162,1163,1164,1165,1167,1170,1171,1172,1173,1174,1175,1179,1181,1183,1187,1189,1191,1192,1193,1195,1197,1199,1201,1202,1204,1205,1206,1207,1209,1210,1211,1216,1217,1222,1223,1225,1232,1236,1237,1239,1240,1243,1245,1246,1249,1251,1253,1256,1257,1259,1262,1263,1265,1266,1267,1269,1271,1272,1273,1274,1277,1279,1280,1281,1282,1283,1284,1287,1288,1294,1295,1300,1301,1302,1303,1304,1305,1307,1309,1313,1315,1316,1322,1323,1326,1330,1334,1337,1338,1339,1340,1341,1344,1347,1348,1349,1352,1353,1354,1356,1357,1358,1360,1363,1364,1365,1366,1367,1370,1372,1373,1374,1375,1376,1377,1378,1379,1382,1383,1384,1389,1390,1395,1396,1401,1407,1409,1410,1411,1414,1416,1417,1419,1420,1421,1422,1424,1425,1426,1428,1431,1436,1437,1439,1440,1441,1443,1446,1451,1452,1456,1457,1458,1461,1466,1467,1469,1470,1471,1473,1476,1477,1482,1484,1485,1486,1488,1490,1491,1494,1500,1501,1505,1507,1510,1513,1514,1516,1517,1519,1524,1525,1530,1533,1537,1538,1542,1543,1546,1550,1551,1557,1558,1561,1562,1563,1564,1567,1568,1573,1574,1576,1579,1580,1582,1583,1586,1587,1589,1590,1592,1593,1594,1595,1596,1599,1602,1603,1604,1608,1612,1615,1616,1617,1619,1626,1628,1629,1630,1631,1633,1634,1635,1636,1642,1643,1644,1645,1647,1648,1652,1655,1657,1659,1660,1661,1663,1665,1666,1667,1671,1673,1675,1676,1678,1679,1682,1683,1685,1686,1687,1691,1694,1696,1697,1698,1699,1701,1702,1705,1706,1709,1710,1711,1715,1716,1718,1724,1726,1727,1730,1733,1735,1736,1737,1738,1742,1743,1745,1747,1748,1752,1753,1754,1755,1758,1760,1761,1764,1765,1766,1769,1771,1772,1774,1779,1784,1787,1789,1792,1795,1799,1800,1801,1802,1804,1805,1808,1810,1811,1813,1817,1823,1825,1826,1827,1829,1831,1832,1835,1836,1838,1840,1841,1843,1844,1847,1850,1852,1853,1856,1859,1860,1863,1866,1867,1868,1869,1871,1872,1873,1874,1875,1879,1886,1888,1890,1891,1892,1893,1894,1895,1897,1900,1901,1902,1903,1904,1905,1906,1907,1912,1913,1916,1922,1923,1924,1925,1927,1928,1930,1931,1934,1935,1937,1939,1940,1943,1946,1952,1959,1961,1963,1965,1968,1969,1970,1971,1972,1975,1980,1982,1987,1988,1991,1994,1995,1996,1998,1999,2000,2003,2004,2007,2010,2011,2012,2016,2017,2018,2019,2020,2021,2023,2024,2025,2026,2028,2030,2031,2033,2036,2037,2039,2040,2041,2042,2048,2049,2050,2053,2054,2055,2056,2057,2060,2061,2065,2068,2070,2072,2073,2074,2075,2076,2077,2078,2079,2081,2082,2088,2089,2091,2094,2096,2097,2099,2101,2103,2104,2105],"R":[1008,1009,1010,1013,1014,1021,1022,1023,1025,1026,1032,1033,1034,1038,1039,1041,1042,1044,1045,1051,1053,1055,1057,1058,1060,1063,1064,1070,1071,1072,1074,1076,1077,1079,1081,1082,1083,1084,1085,1087,1088,1089,1090,1094,1096,1101,1102,1104,1105,1107,1108,1111,1112,1114,1115,1116,1117,1119,1120,1121,1123,1127,1128,1130,1134,1135,1138,1139,1140,1142,1143,1146,1147,1148,1150,1152,1156,1159,1160,1166,1168,1169,1176,1177,1178,1180,1182,1184,1185,1186,1188,1190,1194,1196,1198,1200,1203,1208,1212,1213,1214,1215,1218,1219,1220,1221,1224,1226,1227,1228,1229,1230,1231,1233,1234,1235,1238,1241,1242,1244,1247,1248,1250,1252,1254,1255,1258,1260,1261,1264,1268,1270,1275,1276,1278,1285,1286,1289,1290,1291,1292,1293,1296,1297,1298,1299,1306,1308,1310,1311,1312,1314,1317,1318,1319,1320,1321,1324,1325,1327,1328,1329,1331,1332,1333,1335,1336,1342,1343,1345,1346,1350,1351,1355,1359,1361,1362,1368,1369,1371,1380,1381,1385,1386,1387,1388,1391,1392,1393,1394,1397,1398,1399,1400,1402,1403,1404,1405,1406,1408,1412,1413,1415,1418,1423,1427,1429,1430,1432,1433,1434,1435,1438,1442,1444,1445,1447,1448,1449,1450,1453,1454,1455,1459,1460,1462,1463,1464,1465,1468,1472,1474,1475,1478,1479,1480,1481,1483,1487,1489,1492,1493,1495,1496,1497,1498,1499,1502,1503,1504,1506,1508,1509,1511,1512,1515,1518,1520,1521,1522,1523,1526,1527,1528,1529,1531,1532,1534,1535,1536,1539,1540,1541,1544,1545,1547,1548,1549,1552,1553,1554,1555,1556,1559,1560,1565,1566,1569,1570,1571,1572,1575,1577,1578,1581,1584,1585,1588,1591,1597,1598,1600,1601,1605,1606,1607,1609,1610,1611,1613,1614,1618,1620,1621,1622,1623,1624,1625,1627,1632,1637,1638,1639,1640,1641,1646,1649,1650,1651,1653,1654,1656,1658,1662,1664,1668,1669,1670,1672,1674,1677,1680,1681,1684,1688,1689,1690,1692,1693,1695,1700,1703,1704,1707,1708,1712,1713,1714,1717,1719,1720,1721,1722,1723,1725,1728,1729,1731,1732,1734,1739,1740,1741,1744,1746,1749,1750,1751,1756,1757,1759,1762,1763,1767,1768,1770,1773,1775,1776,1777,1778,1780,1781,1782,1783,1785,1786,1788,1790,1791,1793,1794,1796,1797,1798,1803,1806,1807,1809,1812,1814,1815,1816,1818,1819,1820,1821,1822,1824,1828,1830,1833,1834,1837,1839,1842,1845,1846,1848,1849,1851,1854,1855,1857,1858,1861,1862,1864,1865,1870,1876,1877,1878,1880,1881,1882,1883,1884,1885,1887,1889,1896,1898,1899,1908,1909,1910,1911,1914,1915,1917,1918,1919,1920,1921,1926,1929,1932,1933,1936,1938,1941,1942,1944,1945,1947,1948,1949,1950,1951,1953,1954,1955,1956,1957,1958,1960,1962,1964,1966,1967,1973,1974,1976,1977,1978,1979,1981,1983,1984,1985,1986,1989,1990,1992,1993,1997,2001,2002,2005,2006,2008,2009,2013,2014,2015,2022,2027,2029,2032,2034,2035,2038,2043,2044,2045,2046,2047,2051,2052,2058,2059,2062,2063,2064,2066,2067,2069,2071,2080,2083,2084,2085,2086,2087,2090,2092,2093,2095,2098,2100,2102]},"v_motion":{"L":[2108,2111,2114,2115,2118,2119,2120,2122,2125,2126,2127,2132,2134,2138,2141,2143,2148,2149,2150,2152,2153,2156,2157,2159,2160,2163,2165,2166,2169,2171,2174,2175,2178,2181,2183,2184,2185,2186,2188,2190,2191,2195,2196,2199,2201,2203,2206,2207,2210,2212,2216,2217,2219,2221,2227,2228,2231,2232,2234,2235,2236,2237,2238,2240,2242,2243,2244,2246,2248,2249,2250,2251,2253,2256,2257,2258,2260,2261,2263,2264,2266,2267,2269,2270,2271,2272,2273,2275,2276,2277,2281,2282,2286,2291,2292,2293,2295,2299,2300,2301,2302,2303,2304,2310,2311,2313,2315,2320,2323,2325,2327,2329,2330,2331,2336,2337,2338,2340,2342,2345,2350,2355,2356,2357,2359,2364,2366,2369,2372,2373,2375,2376,2379,2382,2383,2385,2387,2389,2390,2391,2394,2397,2398,2401,2403,2404,2405,2406,2407,2409,2410,2411,2415,2416,2417,2420,2421,2422,2424,2426,2427,2429,2432,2433,2436,2439,2440,2443,2445,2448,2449,2452,2453,2454,2456,2460,2464,2465,2466,2468,2473,2474,2475,2476,2478,2485,2486,2487],"R":[2106,2107,2109,2110,2112,2113,2116,2117,2121,2123,2124,2128,2129,2130,2131,2133,2135,2136,2137,2139,2140,2142,2144,2145,2146,2147,2151,2154,2155,2158,2161,2162,2164,2167,2168,2170,2172,2173,2176,2177,2179,2180,2182,2187,2189,2192,2193,2194,2197,2198,2200,2202,2204,2205,2208,2209,2211,2213,2214,2215,2218,2220,2222,2223,2224,2225,2226,2229,2230,2233,2239,2241,2245,2247,2252,2254,2255,2259,2262,2265,2268,2274,2278,2279,2280,2283,2284,2285,2287,2288,2289,2290,2294,2296,2297,2298,2305,2306,2307,2308,2309,2312,2314,2316,2317,2318,2319,2321,2322,2324,2326,2328,2332,2333,2334,2335,2339,2341,2343,2344,2346,2347,2348,2349,2351,2352,2353,2354,2358,2360,2361,2362,2363,2365,2367,2368,2370,2371,2374,2377,2378,2380,2381,2384,2386,2388,2392,2393,2395,2396,2399,2400,2402,2408,2412,2413,2414,2418,2419,2423,2425,2428,2430,2431,2434,2435,2437,2438,2441,2442,2444,2446,2447,2450,2451,2455,2457,2458,2459,2461,2462,2463,2467,2469,2470,2471,2472,2477,2479,2480,2481,2482,2483,2484,2488]},"v_wide":{"L":[2489,2491,2494,2497,2498,2499,2501,2504,2508,2510,2511,2512,2513,2514,2515,2521,2524,2525,2527,2528,2531,2533,2534,2536,2538,2540,2541,2543,2547,2548],"R":[2490,2492,2493,2495,2496,2500,2502,2503,2505,2506,2507,2509,2516,2517,2518,2519,2520,2522,2523,2526,2529,2530,2532,2535,2537,2539,2542,2544,2545,2546,2549]}},"T":{"DNa02":{"L":[138628],"R":[138621]},"MDN":{"L":[138623,138630],"R":[138622,138634]},"P9":{"L":[138633],"R":[138626]},"GF":{"L":[138625],"R":[138632]},"DNa01":{"L":[138627],"R":[138636]},"MN9":{"L":[138624],"R":[138638]},"Fdg":{"L":[138631],"R":[138637]},"aBN1":{"L":[138629],"R":[138635]}},"odorPN":{"L":[104031,117734,123494],"R":[108505,108961,128045]},"types":["5-HT-IR  Tan","5-HTPLP01","5-HTPMPD01","5-HTPMPV01","5-HTPMPV03","?","AC neuron","AL-AST1","AL-MBDL1","ALBN1","ALIN1","ALIN2","ALIN3","ALIN4","ALIN5","ALIN6","ALIN7","ALIN8","ALON1","ALON2","ALON3","AMMC-A1","AMMC028","AN01A021","AN19A018","ANXXX005","AN_AMMC_SAD_1","AN_AMMC_SAD_2","AN_AVLP_1","AN_AVLP_10","AN_AVLP_11","AN_AVLP_12","AN_AVLP_13","AN_AVLP_14","AN_AVLP_15","AN_AVLP_16","AN_AVLP_17","AN_AVLP_18","AN_AVLP_19","AN_AVLP_2","AN_AVLP_20","AN_AVLP_21","AN_AVLP_22","AN_AVLP_23","AN_AVLP_24","AN_AVLP_25","AN_AVLP_26","AN_AVLP_27","AN_AVLP_28","AN_AVLP_29","AN_AVLP_3","AN_AVLP_30","AN_AVLP_31","AN_AVLP_32","AN_AVLP_33","AN_AVLP_34","AN_AVLP_35","AN_AVLP_36","AN_AVLP_37","AN_AVLP_38","AN_AVLP_39","AN_AVLP_4","AN_AVLP_40","AN_AVLP_41","AN_AVLP_42","AN_AVLP_43","AN_AVLP_44","AN_AVLP_45","AN_AVLP_46","AN_AVLP_47","AN_AVLP_48","AN_AVLP_49","AN_AVLP_5","AN_AVLP_50","AN_AVLP_51","AN_AVLP_52","AN_AVLP_53","AN_AVLP_54","AN_AVLP_6","AN_AVLP_7","AN_AVLP_8","AN_AVLP_9","AN_AVLP_GNG_1","AN_AVLP_GNG_10","AN_AVLP_GNG_11","AN_AVLP_GNG_12","AN_AVLP_GNG_13","AN_AVLP_GNG_14","AN_AVLP_GNG_15","AN_AVLP_GNG_16","AN_AVLP_GNG_17","AN_AVLP_GNG_18","AN_AVLP_GNG_19","AN_AVLP_GNG_2","AN_AVLP_GNG_20","AN_AVLP_GNG_21","AN_AVLP_GNG_22","AN_AVLP_GNG_23","AN_AVLP_GNG_3","AN_AVLP_GNG_4","AN_AVLP_GNG_5","AN_AVLP_GNG_6","AN_AVLP_GNG_7","AN_AVLP_GNG_8","AN_AVLP_GNG_9","AN_AVLP_PVLP_1","AN_AVLP_PVLP_10","AN_AVLP_PVLP_2","AN_AVLP_PVLP_3","AN_AVLP_PVLP_4","AN_AVLP_PVLP_5","AN_AVLP_PVLP_6","AN_AVLP_PVLP_7","AN_AVLP_PVLP_8","AN_AVLP_PVLP_9","AN_AVLP_SAD_1","AN_AVLP_SAD_2","AN_AVLP_SAD_3","AN_AVLP_SAD_5","AN_FLA_1","AN_FLA_GNG_1","AN_FLA_GNG_2","AN_FLA_PRW_1","AN_FLA_PRW_2","AN_FLA_SMP_1","AN_FLA_SMP_2","AN_FLA_VES_1","AN_FLA_VES_2","AN_GNG_1","AN_GNG_10","AN_GNG_100","AN_GNG_101","AN_GNG_102","AN_GNG_103","AN_GNG_104","AN_GNG_105","AN_GNG_106","AN_GNG_107","AN_GNG_108","AN_GNG_109","AN_GNG_11","AN_GNG_110","AN_GNG_111","AN_GNG_112","AN_GNG_113","AN_GNG_114","AN_GNG_115","AN_GNG_116","AN_GNG_117","AN_GNG_118","AN_GNG_119","AN_GNG_12","AN_GNG_120","AN_GNG_121","AN_GNG_122","AN_GNG_123","AN_GNG_124","AN_GNG_125","AN_GNG_126","AN_GNG_127","AN_GNG_128","AN_GNG_129","AN_GNG_13","AN_GNG_130","AN_GNG_131","AN_GNG_132","AN_GNG_133","AN_GNG_134","AN_GNG_135","AN_GNG_136","AN_GNG_137","AN_GNG_138","AN_GNG_139","AN_GNG_14","AN_GNG_140","AN_GNG_141","AN_GNG_142","AN_GNG_143","AN_GNG_144","AN_GNG_145","AN_GNG_146","AN_GNG_147","AN_GNG_148","AN_GNG_149","AN_GNG_15","AN_GNG_150","AN_GNG_151","AN_GNG_152","AN_GNG_153","AN_GNG_154","AN_GNG_155","AN_GNG_156","AN_GNG_157","AN_GNG_158","AN_GNG_159","AN_GNG_16","AN_GNG_160","AN_GNG_161","AN_GNG_162","AN_GNG_163","AN_GNG_164","AN_GNG_165","AN_GNG_166","AN_GNG_167","AN_GNG_168","AN_GNG_169","AN_GNG_17","AN_GNG_170","AN_GNG_171","AN_GNG_172","AN_GNG_173","AN_GNG_174","AN_GNG_175","AN_GNG_176","AN_GNG_177","AN_GNG_178","AN_GNG_179","AN_GNG_18","AN_GNG_180","AN_GNG_181","AN_GNG_182","AN_GNG_183","AN_GNG_184","AN_GNG_185","AN_GNG_186","AN_GNG_187","AN_GNG_188","AN_GNG_189","AN_GNG_19","AN_GNG_190","AN_GNG_191","AN_GNG_192","AN_GNG_193","AN_GNG_194","AN_GNG_195","AN_GNG_196","AN_GNG_197","AN_GNG_198","AN_GNG_199","AN_GNG_2","AN_GNG_20","AN_GNG_200","AN_GNG_201","AN_GNG_202","AN_GNG_203","AN_GNG_204","AN_GNG_21","AN_GNG_22","AN_GNG_23","AN_GNG_24","AN_GNG_25","AN_GNG_26","AN_GNG_27","AN_GNG_28","AN_GNG_29","AN_GNG_3","AN_GNG_30","AN_GNG_31","AN_GNG_32","AN_GNG_33","AN_GNG_34","AN_GNG_35","AN_GNG_36","AN_GNG_37","AN_GNG_38","AN_GNG_39","AN_GNG_4","AN_GNG_40","AN_GNG_41","AN_GNG_42","AN_GNG_43","AN_GNG_44","AN_GNG_45","AN_GNG_46","AN_GNG_47","AN_GNG_48","AN_GNG_49","AN_GNG_5","AN_GNG_51","AN_GNG_52","AN_GNG_53","AN_GNG_54","AN_GNG_55","AN_GNG_56","AN_GNG_57","AN_GNG_58","AN_GNG_59","AN_GNG_6","AN_GNG_60","AN_GNG_61","AN_GNG_62","AN_GNG_63","AN_GNG_64","AN_GNG_65","AN_GNG_66","AN_GNG_67","AN_GNG_68","AN_GNG_69","AN_GNG_7","AN_GNG_70","AN_GNG_71","AN_GNG_72","AN_GNG_73","AN_GNG_74","AN_GNG_75","AN_GNG_76","AN_GNG_77","AN_GNG_78","AN_GNG_79","AN_GNG_8","AN_GNG_80","AN_GNG_81","AN_GNG_82","AN_GNG_83","AN_GNG_84","AN_GNG_85","AN_GNG_86","AN_GNG_87","AN_GNG_88","AN_GNG_89","AN_GNG_9","AN_GNG_90","AN_GNG_91","AN_GNG_92","AN_GNG_93","AN_GNG_94","AN_GNG_95","AN_GNG_96","AN_GNG_97","AN_GNG_98","AN_GNG_99","AN_GNG_AMMC_1","AN_GNG_AMMC_2","AN_GNG_AMMC_3","AN_GNG_AVLP_1","AN_GNG_AVLP_2","AN_GNG_FLA_1","AN_GNG_FLA_2","AN_GNG_FLA_3","AN_GNG_FLA_4","AN_GNG_FLA_5","AN_GNG_FLA_6","AN_GNG_IPS_1","AN_GNG_IPS_10","AN_GNG_IPS_11","AN_GNG_IPS_12","AN_GNG_IPS_13","AN_GNG_IPS_14","AN_GNG_IPS_15","AN_GNG_IPS_16","AN_GNG_IPS_17","AN_GNG_IPS_18","AN_GNG_IPS_19","AN_GNG_IPS_2","AN_GNG_IPS_20","AN_GNG_IPS_3","AN_GNG_IPS_4","AN_GNG_IPS_5","AN_GNG_IPS_6","AN_GNG_IPS_7","AN_GNG_IPS_8","AN_GNG_IPS_9","AN_GNG_LAL_1","AN_GNG_PRW_1","AN_GNG_PRW_2","AN_GNG_PRW_3","AN_GNG_PRW_4","AN_GNG_SAD33","AN_GNG_SAD_1","AN_GNG_SAD_10","AN_GNG_SAD_11","AN_GNG_SAD_12","AN_GNG_SAD_13","AN_GNG_SAD_14","AN_GNG_SAD_15","AN_GNG_SAD_16","AN_GNG_SAD_17","AN_GNG_SAD_18","AN_GNG_SAD_19","AN_GNG_SAD_2","AN_GNG_SAD_20","AN_GNG_SAD_21","AN_GNG_SAD_22","AN_GNG_SAD_23","AN_GNG_SAD_24","AN_GNG_SAD_25","AN_GNG_SAD_26","AN_GNG_SAD_27","AN_GNG_SAD_28","AN_GNG_SAD_29","AN_GNG_SAD_3","AN_GNG_SAD_30","AN_GNG_SAD_31","AN_GNG_SAD_32","AN_GNG_SAD_33","AN_GNG_SAD_34","AN_GNG_SAD_35","AN_GNG_SAD_4","AN_GNG_SAD_5","AN_GNG_SAD_6","AN_GNG_SAD_7","AN_GNG_SAD_8","AN_GNG_SAD_9","AN_GNG_SPS_1","AN_GNG_VES_1","AN_GNG_VES_10","AN_GNG_VES_11","AN_GNG_VES_12","AN_GNG_VES_2","AN_GNG_VES_3","AN_GNG_VES_4","AN_GNG_VES_5","AN_GNG_VES_6","AN_GNG_VES_7","AN_GNG_VES_8","AN_GNG_VES_9","AN_GNG_WED_1","AN_GNG_WED_2","AN_GNG_WED_3","AN_IPS_1","AN_IPS_GNG_1","AN_IPS_GNG_2","AN_IPS_GNG_3","AN_IPS_GNG_4","AN_IPS_GNG_5","AN_IPS_GNG_6","AN_IPS_GNG_7","AN_IPS_LAL_1","AN_IPS_SPS_1","AN_IPS_WED_1","AN_IPS_WED_2","AN_LAL_1","AN_LH_AVLP_1","AN_PRW_FLA_1","AN_SAD_FLA_1","AN_SAD_GNG_1","AN_SAD_GNG_2","AN_SLP_AVLP_1","AN_SLP_LH_1","AN_SMP_1","AN_SMP_2","AN_SMP_3","AN_SMP_FLA_1","AN_SPS_GNG_1","AN_SPS_IPS_1","AN_SPS_IPS_2","AN_SPS_IPS_3","AN_SPS_IPS_4","AN_SPS_IPS_5","AN_SPS_IPS_6","AN_VES_GNG_1","AN_VES_GNG_2","AN_VES_GNG_3","AN_VES_GNG_4","AN_VES_GNG_5","AN_VES_GNG_6","AN_VES_GNG_7","AN_VES_GNG_8","AN_VES_WED_1","AN_VES_WED_2","AN_VES_WED_3","AN_WED_GNG_1","AN_WED_GNG_2","AN_multi_1","AN_multi_10","AN_multi_100","AN_multi_101","AN_multi_102","AN_multi_103","AN_multi_104","AN_multi_105","AN_multi_106","AN_multi_107","AN_multi_108","AN_multi_109","AN_multi_11","AN_multi_110","AN_multi_111","AN_multi_112","AN_multi_113","AN_multi_114","AN_multi_115","AN_multi_116","AN_multi_117","AN_multi_118","AN_multi_119","AN_multi_12","AN_multi_120","AN_multi_121","AN_multi_122","AN_multi_124","AN_multi_125","AN_multi_127","AN_multi_128","AN_multi_13","AN_multi_14","AN_multi_15","AN_multi_16","AN_multi_17","AN_multi_18","AN_multi_19","AN_multi_2","AN_multi_20","AN_multi_21","AN_multi_22","AN_multi_23","AN_multi_24","AN_multi_25","AN_multi_26","AN_multi_27","AN_multi_28","AN_multi_29","AN_multi_3","AN_multi_30","AN_multi_31","AN_multi_32","AN_multi_33","AN_multi_34","AN_multi_35","AN_multi_36","AN_multi_37","AN_multi_38","AN_multi_39","AN_multi_4","AN_multi_40","AN_multi_41","AN_multi_42","AN_multi_43","AN_multi_44","AN_multi_45","AN_multi_46","AN_multi_47","AN_multi_48","AN_multi_49","AN_multi_50","AN_multi_51","AN_multi_52","AN_multi_53","AN_multi_54","AN_multi_55","AN_multi_56","AN_multi_57","AN_multi_58","AN_multi_59","AN_multi_6","AN_multi_60","AN_multi_61","AN_multi_62","AN_multi_63","AN_multi_64","AN_multi_65","AN_multi_66","AN_multi_67","AN_multi_68","AN_multi_69","AN_multi_7","AN_multi_70","AN_multi_71","AN_multi_72","AN_multi_73","AN_multi_74","AN_multi_75","AN_multi_76","AN_multi_77","AN_multi_78","AN_multi_79","AN_multi_8","AN_multi_80","AN_multi_81","AN_multi_82","AN_multi_83","AN_multi_84","AN_multi_85","AN_multi_86","AN_multi_87","AN_multi_88","AN_multi_89","AN_multi_9","AN_multi_90","AN_multi_91","AN_multi_92","AN_multi_93","AN_multi_94","AN_multi_95","AN_multi_96","AN_multi_97","AN_multi_98","AN_multi_99","AOTU007","AOTU008a","AOTU008b","AOTU008c","AOTU008d","AOTU009","AOTU011","AOTU012","AOTU013","AOTU014","AOTU015a","AOTU015b","AOTU018,AOTU031","AOTU019","AOTU020","AOTU021","AOTU022","AOTU023","AOTU024","AOTU025","AOTU026","AOTU027","AOTU028","AOTU030","AOTU032,AOTU034","AOTU033","AOTU035","AOTU036","AOTU037","AOTU038","AOTU039","AOTU041","AOTU042","AOTU046","AOTU047","AOTU048","AOTU049","AOTU050","AOTU050a","AOTU050b","AOTU051","AOTU052","AOTU053","AOTU054","AOTU059","AOTU060","AOTU061","AOTU062","AOTU063a","AOTU063b","AOTU064","AOTU065","AOTUv1A_T01","AOTUv3B_M01","AOTUv3B_P01","AOTUv3B_P02","AOTUv3B_P06","AOTUv4B_P02","APDN3","APL","ATL001","ATL002","ATL003","ATL004","ATL006","ATL008","ATL009","ATL010","ATL011","ATL012","ATL013","ATL014","ATL015","ATL016","ATL017,ATL018","ATL021","ATL022","ATL023","ATL024,IB042","ATL025","ATL026","ATL027","ATL028","ATL029","ATL030","ATL031","ATL032","ATL033","ATL034","ATL035,ATL036","ATL037","ATL038,ATL039","ATL040","ATL042","ATL043","ATL044","AVLP001","AVLP006a","AVLP006b","AVLP008","AVLP009","AVLP010","AVLP011,AVLP012","AVLP013","AVLP014","AVLP015","AVLP016","AVLP017","AVLP018","AVLP019","AVLP020","AVLP021","AVLP022","AVLP023","AVLP024a","AVLP024b","AVLP024c","AVLP025","AVLP026","AVLP027","AVLP028","AVLP029","AVLP030","AVLP031","AVLP032","AVLP033","AVLP034","AVLP035","AVLP037,AVLP038","AVLP038","AVLP039","AVLP040","AVLP041","AVLP042","AVLP043","AVLP044_a","AVLP044b","AVLP045","AVLP046","AVLP047","AVLP048","AVLP049","AVLP050","AVLP051","AVLP053","AVLP055","AVLP059","AVLP069","AVLP075","AVLP076","AVLP077","AVLP078","AVLP079","AVLP080","AVLP081","AVLP082","AVLP083","AVLP084","AVLP085","AVLP086","AVLP087","AVLP088","AVLP089","AVLP090","AVLP091","AVLP093","AVLP094","AVLP096","AVLP097","AVLP098","AVLP099","AVLP100","AVLP101","AVLP102","AVLP105","AVLP107","AVLP108","AVLP109","AVLP116","AVLP120","AVLP121","AVLP129","AVLP132","AVLP136","AVLP140","AVLP143a","AVLP143b","AVLP147","AVLP149","AVLP151","AVLP152","AVLP153","AVLP154","AVLP155","AVLP156","AVLP157","AVLP158","AVLP159","AVLP160","AVLP161","AVLP162","AVLP164","AVLP165","AVLP169","AVLP176_c","AVLP178","AVLP180","AVLP182","AVLP184","AVLP186","AVLP187","AVLP189_a","AVLP189_b","AVLP190,AVLP191","AVLP193","AVLP194","AVLP194_a","AVLP194_b","AVLP194_c","AVLP195","AVLP200","AVLP201","AVLP202","AVLP203","AVLP205a","AVLP205b","AVLP209","AVLP210","AVLP211","AVLP212","AVLP213","AVLP214","AVLP215","AVLP216","AVLP217","AVLP218a","AVLP218b","AVLP219a","AVLP219b","AVLP219c","AVLP220","AVLP222","AVLP224_a","AVLP227","AVLP229","AVLP230","AVLP232","AVLP234a","AVLP234b","AVLP235","AVLP243","AVLP244","AVLP251","AVLP252","AVLP253,AVLP254","AVLP255","AVLP256","AVLP257","AVLP258","AVLP259","AVLP260","AVLP263","AVLP265a","AVLP265b","AVLP266","AVLP267","AVLP268","AVLP269_a","AVLP279","AVLP280","AVLP281","AVLP282","AVLP283","AVLP284","AVLP286","AVLP287","AVLP288","AVLP289","AVLP290a","AVLP290b","AVLP292","AVLP293","AVLP294","AVLP295","AVLP297","AVLP298","AVLP299_a","AVLP299_b","AVLP299_c","AVLP300_a","AVLP300_b","AVLP302","AVLP303","AVLP304","AVLP305","AVLP306","AVLP308","AVLP309","AVLP310a","AVLP310b","AVLP312a","AVLP312b","AVLP313","AVLP314","AVLP315","AVLP316","AVLP317","AVLP322","AVLP323","AVLP330","AVLP339","AVLP340","AVLP342","AVLP343","AVLP344","AVLP345","AVLP345_a","AVLP346","AVLP347","AVLP348","AVLP363","AVLP369","AVLP370a","AVLP370b","AVLP371","AVLP373","AVLP380a","AVLP380b","AVLP381","AVLP386,AVLP388","AVLP390","AVLP393,AVLP395","AVLP394","AVLP396","AVLP397","AVLP398","AVLP399","AVLP402","AVLP409","AVLP411","AVLP417,AVLP438","AVLP418","AVLP419a","AVLP419b","AVLP420_a,AVLP427","AVLP420_b","AVLP421","AVLP423","AVLP428","AVLP429","AVLP430","AVLP432","AVLP433_a","AVLP433_b","AVLP434_a","AVLP434_b","AVLP435a","AVLP435b","AVLP436","AVLP437","AVLP439","AVLP441","AVLP442","AVLP443","AVLP444","AVLP445","AVLP446","AVLP447","AVLP448","AVLP449","AVLP451a","AVLP451b","AVLP451c","AVLP454_a","AVLP454_b","AVLP455","AVLP457","AVLP458","AVLP459","AVLP460","AVLP461","AVLP462a","AVLP462b","AVLP464","AVLP465a","AVLP465b","AVLP465c","AVLP469a","AVLP469b","AVLP470a","AVLP470b","AVLP471","AVLP473","AVLP474","AVLP475a","AVLP475b","AVLP476","AVLP477","AVLP478","AVLP479","AVLP486","AVLP487","AVLP488","AVLP489","AVLP490","AVLP491","AVLP492","AVLP494","AVLP496a","AVLP496b","AVLP497","AVLP498","AVLP500","AVLP501","AVLP502","AVLP503","AVLP504","AVLP505","AVLP506","AVLP507","AVLP508","AVLP509","AVLP517","AVLP519a","AVLP519b","AVLP520","AVLP521","AVLP522","AVLP523","AVLP530,AVLP561","AVLP531","AVLP532","AVLP533","AVLP534","AVLP535","AVLP536","AVLP537","AVLP538","AVLP541a","AVLP541b","AVLP542","AVLP543","AVLP544","AVLP546","AVLP547a","AVLP547b","AVLP548_b","AVLP548_d","AVLP548_e","AVLP548_f","AVLP550a","AVLP550b","AVLP555","AVLP557","AVLP558","AVLP559a","AVLP559b","AVLP559c","AVLP560","AVLP562","AVLP563","AVLP565","AVLP566","AVLP567","AVLP568","AVLP569","AVLP570","AVLP571","AVLP572","AVLP573","AVLP574","AVLP575","AVLP576","AVLP577","AVLP578","AVLP579","AVLP580","AVLP584","AVLP586","AVLP590","AVLP591","AVLP592","AVLP593","AVLP594","AVLP595","AVLP596","Am","Am1","AstA1","BM_Ant","BM_Fr","BM_FrOr","BM_Hau","BM_InOc","BM_InOm","BM_MaPa","BM_Oc","BM_Or","BM_Taste","BM_Vib","BM_Vt_PoOc","BM_dOcci","BM_dPoOr","BM_vOcci_vPoOr","BiT","C2","C3","CAPA","CB0004","CB0005","CB0007","CB0008","CB0009","CB0010","CB0011","CB0013","CB0014","CB0015","CB0016","CB0017","CB0018","CB0019","CB0020","CB0021","CB0022","CB0023","CB0024","CB0025","CB0026","CB0027","CB0029","CB0030","CB0031","CB0032","CB0033","CB0034","CB0035","CB0036","CB0038","CB0039","CB0040","CB0041","CB0045","CB0046","CB0047","CB0048","CB0049","CB0050","CB0051","CB0053","CB0055","CB0056","CB0057","CB0058","CB0059","CB0060","CB0061","CB0062","CB0064","CB0065","CB0066","CB0067","CB0069","CB0070","CB0071","CB0072","CB0073","CB0074","CB0075","CB0076","CB0078","CB0079","CB0080","CB0082","CB0083","CB0084","CB0086","CB0087","CB0088","CB0089","CB0090","CB0091","CB0094","CB0095","CB0096","CB0097","CB0098","CB0099","CB0100","CB0101","CB0102","CB0103","CB0104","CB0106","CB0107","CB0108","CB0109","CB0110","CB0113","CB0114","CB0115","CB0117","CB0118","CB0121","CB0122","CB0124","CB0125","CB0126","CB0128","CB0129","CB0130","CB0131","CB0132","CB0135","CB0136","CB0137","CB0138","CB0140","CB0141","CB0142","CB0143","CB0144","CB0148","CB0149","CB0150","CB0151","CB0152","CB0153","CB0154","CB0155","CB0157","CB0158","CB0159","CB0161","CB0163","CB0164","CB0166","CB0168","CB0170","CB0172","CB0174","CB0175","CB0176","CB0177","CB0179","CB0180","CB0182","CB0183","CB0184","CB0186","CB0187","CB0188","CB0189","CB0190","CB0191","CB0192","CB0194","CB0195","CB0196","CB0197","CB0198","CB0200","CB0202","CB0204","CB0206","CB0207","CB0208","CB0211","CB0212","CB0213","CB0214","CB0215","CB0216","CB0217","CB0218","CB0219","CB0220","CB0221","CB0222","CB0223","CB0224","CB0225","CB0226","CB0227","CB0228","CB0229","CB0230","CB0231","CB0232","CB0233","CB0235","CB0237","CB0238","CB0239","CB0240","CB0241","CB0242","CB0244","CB0245","CB0246","CB0247","CB0248","CB0249","CB0250","CB0251","CB0254","CB0255","CB0256","CB0257","CB0258","CB0259","CB0261","CB0262","CB0264","CB0265","CB0266","CB0267","CB0268","CB0269","CB0270","CB0272","CB0276","CB0277","CB0278","CB0279","CB0280","CB0282","CB0283","CB0284","CB0285","CB0286","CB0287","CB0288","CB0289","CB0292","CB0294","CB0295","CB0296","CB0297","CB0298","CB0299","CB0300","CB0302","CB0303","CB0305","CB0306","CB0307","CB0309","CB0310","CB0311","CB0312","CB0313","CB0314","CB0316","CB0317","CB0318","CB0319","CB0320","CB0323","CB0324","CB0325","CB0327","CB0328","CB0331","CB0333","CB0335","CB0336","CB0337","CB0339","CB0340","CB0341","CB0342","CB0343","CB0344","CB0345","CB0346","CB0349","CB0350","CB0351","CB0352","CB0354","CB0356","CB0357","CB0358","CB0359","CB0360","CB0361","CB0362","CB0363","CB0364","CB0366","CB0367","CB0368","CB0369","CB0370","CB0373","CB0374","CB0376","CB0377","CB0378","CB0379","CB0380","CB0381","CB0382","CB0385","CB0386","CB0387","CB0390","CB0391","CB0392","CB0393","CB0394","CB0396","CB0397","CB0398","CB0399","CB0400","CB0402","CB0404","CB0405","CB0407","CB0408","CB0409","CB0410","CB0413","CB0414","CB0415","CB0416","CB0417","CB0418","CB0419","CB0420","CB0421","CB0422","CB0423","CB0424","CB0426","CB0429","CB0430","CB0431","CB0432","CB0433","CB0434","CB0435","CB0436","CB0437","CB0438","CB0440","CB0441","CB0442","CB0443","CB0444","CB0445","CB0446","CB0448","CB0449","CB0450","CB0451","CB0452","CB0453","CB0454","CB0455","CB0456","CB0457","CB0458","CB0459","CB0460","CB0461","CB0462","CB0463","CB0465","CB0466","CB0467","CB0468","CB0469","CB0473","CB0475","CB0477","CB0478","CB0479","CB0480","CB0481","CB0483","CB0484","CB0485","CB0486","CB0487","CB0488","CB0489","CB0491","CB0492","CB0493","CB0494","CB0495","CB0496","CB0497","CB0498","CB0499","CB0500","CB0501","CB0502","CB0503","CB0504","CB0507","CB0508","CB0509","CB0510","CB0512","CB0514","CB0515","CB0516","CB0517","CB0518","CB0519","CB0521","CB0522","CB0523","CB0524","CB0525","CB0526","CB0527","CB0528","CB0529","CB0530","CB0531","CB0532","CB0533","CB0534","CB0538","CB0539","CB0540","CB0541","CB0542","CB0543","CB0544","CB0545","CB0546","CB0547","CB0548","CB0549","CB0550","CB0552","CB0553","CB0555","CB0556","CB0557","CB0558","CB0559","CB0560","CB0561","CB0563","CB0564","CB0565","CB0567","CB0568","CB0571","CB0572","CB0573","CB0574","CB0575","CB0576","CB0579","CB0580","CB0581","CB0582","CB0583","CB0584","CB0585","CB0586","CB0587","CB0588","CB0591","CB0593","CB0595","CB0596","CB0597","CB0598","CB0599","CB0600","CB0601","CB0602","CB0603","CB0604","CB0605","CB0606","CB0607","CB0608","CB0609","CB0610","CB0611","CB0612","CB0615","CB0616","CB0617","CB0618","CB0619","CB0620","CB0623","CB0624","CB0625","CB0626","CB0627","CB0628","CB0629","CB0630","CB0631","CB0632","CB0633","CB0635","CB0637","CB0638","CB0640","CB0641","CB0642","CB0643","CB0644","CB0645","CB0646","CB0647","CB0648","CB0649","CB0650","CB0651","CB0652","CB0653","CB0654","CB0655","CB0656","CB0657","CB0658","CB0659","CB0660","CB0661","CB0662","CB0663","CB0665","CB0666","CB0667","CB0668","CB0669","CB0670","CB0671","CB0674","CB0675","CB0676","CB0677","CB0678","CB0679","CB0681","CB0682","CB0683","CB0684","CB0685","CB0687","CB0688","CB0689","CB0690","CB0695","CB0696","CB0698","CB0699","CB0700","CB0701","CB0703","CB0704","CB0705","CB0706","CB0707","CB0708","CB0709","CB0710","CB0713","CB0715","CB0716","CB0717","CB0718","CB0719","CB0720","CB0721","CB0722","CB0723","CB0724","CB0727","CB0728","CB0731","CB0732","CB0733","CB0734","CB0736","CB0737","CB0738","CB0739","CB0740","CB0742","CB0743","CB0744","CB0746","CB0747","CB0749","CB0750","CB0751","CB0752","CB0753","CB0754","CB0755","CB0756","CB0757","CB0758","CB0759","CB0761","CB0762","CB0763","CB0764","CB0765","CB0766","CB0768","CB0769","CB0770","CB0771","CB0772","CB0773","CB0774","CB0775","CB0778","CB0779","CB0781","CB0783","CB0784","CB0785","CB0786","CB0787","CB0788","CB0789","CB0791","CB0792","CB0793","CB0795","CB0796","CB0797","CB0798","CB0799","CB0800","CB0801","CB0802","CB0803","CB0804","CB0806","CB0807","CB0809","CB0810","CB0811","CB0812","CB0813","CB0814","CB0815","CB0817","CB0819","CB0821","CB0823","CB0824","CB0825","CB0827","CB0828","CB0829","CB0830","CB0831","CB0832","CB0833","CB0834","CB0835","CB0836","CB0838","CB0839","CB0840","CB0842","CB0844","CB0845","CB0847","CB0848","CB0850","CB0851","CB0853","CB0854","CB0855","CB0856","CB0857","CB0858","CB0859","CB0860","CB0861","CB0862","CB0863","CB0864","CB0865","CB0866","CB0867","CB0869","CB0870","CB0871","CB0872","CB0873","CB0874","CB0875","CB0877","CB0878","CB0879","CB0880","CB0881","CB0882","CB0883","CB0884","CB0885","CB0886","CB0889","CB0890","CB0891","CB0892","CB0893","CB0894","CB0895","CB0896","CB0897","CB0898","CB0899","CB0900","CB0901","CB0902","CB0903","CB0904","CB0906","CB0907","CB0908","CB0909","CB0910","CB0911","CB0912","CB0913","CB0914","CB0915","CB0916","CB0917","CB0918","CB0919","CB0920","CB0921","CB0922","CB0923","CB0924","CB0925","CB0926","CB0927","CB0929","CB0930","CB0931","CB0932","CB0933","CB0934","CB0937","CB0938","CB0939","CB0942","CB0943","CB0944","CB0945","CB0946","CB0947","CB0948","CB0950","CB0951","CB0952","CB0955","CB0956","CB0957","CB0958a","CB0958b","CB0958c","CB0959","CB0960","CB0961","CB0962a","CB0962b","CB0963","CB0964","CB0965","CB0966","CB0967","CB0968","CB0969","CB0971","CB0972","CB0973","CB0975","CB0976","CB0977","CB0978","CB0979a","CB0979b","CB0980","CB0981","CB0982","CB0983","CB0984","CB0985","CB0986","CB0987","CB0988","CB0989","CB0990","CB0991","CB0992","CB0993","CB0994","CB0996","CB0997","CB0998","CB0999","CB1000","CB1001","CB1002","CB1003","CB1005","CB1006","CB1007","CB1008","CB1009","CB1010","CB1011","CB1012","CB1013","CB1014","CB1015","CB1016","CB1017","CB1018","CB1020","CB1021","CB1022","CB1023","CB1024","CB1025","CB1026","CB1028","CB1029","CB1030","CB1031","CB1032","CB1033","CB1035","CB1036","CB1037","CB1038a","CB1038b","CB1038c","CB1038d","CB1039","CB1040","CB1042","CB1043","CB1044","CB1045","CB1046","CB1047","CB1048","CB1049","CB1050","CB1051","CB1053","CB1054","CB1055","CB1056","CB1057","CB1058","CB1059","CB1060","CB1061","CB1062","CB1063","CB1064","CB1065","CB1066","CB1067","CB1068","CB1069","CB1071","CB1072","CB1073","CB1074","CB1076","CB1077","CB1078","CB1079","CB1080","CB1081","CB1083","CB1084","CB1085","CB1086","CB1087","CB1088","CB1089","CB1090","CB1091","CB1092","CB1093","CB1094","CB1095","CB1096","CB1097","CB1098","CB1099","CB1100","CB1101","CB1102","CB1103","CB1104","CB1105","CB1106","CB1107","CB1108","CB1109","CB1110","CB1111","CB1112","CB1113","CB1114","CB1115","CB1116","CB1117","CB1119","CB1120","CB1121","CB1122","CB1124","CB1125","CB1126","CB1127","CB1128","CB1129","CB1130","CB1131","CB1132","CB1134","CB1138","CB1139","CB1140","CB1141,CB1285","CB1142","CB1143","CB1144","CB1145","CB1148","CB1149","CB1150","CB1151","CB1152","CB1153","CB1154","CB1155","CB1156","CB1159","CB1160","CB1161","CB1163","CB1165","CB1167","CB1168","CB1169","CB1170","CB1171","CB1172","CB1173","CB1174","CB1175","CB1176","CB1178","CB1179","CB1181","CB1182","CB1183","CB1184","CB1185","CB1187","CB1188","CB1189","CB1190","CB1191","CB1192","CB1193","CB1194","CB1195","CB1196","CB1198","CB1199","CB1200","CB1201","CB1202","CB1203","CB1205","CB1206","CB1207","CB1208","CB1210","CB1211","CB1212","CB1213","CB1214","CB1215","CB1217","CB1218","CB1219","CB1220","CB1221","CB1222","CB1223","CB1224","CB1225","CB1226","CB1227","CB1228","CB1229","CB1230","CB1231a","CB1231b","CB1231c","CB1232","CB1233","CB1235","CB1236","CB1237","CB1238","CB1240","CB1241","CB1242","CB1243","CB1244","CB1245","CB1246","CB1247","CB1248","CB1249","CB1250","CB1251","CB1252","CB1253","CB1254","CB1255","CB1256","CB1258","CB1259","CB1260","CB1262","CB1263","CB1264","CB1265","CB1266","CB1267","CB1268","CB1269","CB1270","CB1271","CB1272","CB1273","CB1274","CB1275","CB1276","CB1278","CB1279","CB1280","CB1281","CB1282","CB1283","CB1284","CB1286","CB1287","CB1288","CB1289","CB1291","CB1292","CB1293","CB1294","CB1295","CB1296","CB1297","CB1298","CB1299","CB1300","CB1301","CB1302","CB1303","CB1304","CB1305","CB1306","CB1307","CB1308","CB1309","CB1310","CB1311","CB1312","CB1314","CB1315","CB1316","CB1317","CB1318","CB1319","CB1320","CB1321","CB1322","CB1323","CB1325","CB1326","CB1327","CB1328","CB1329","CB1330","CB1331a","CB1331b","CB1332","CB1333","CB1334","CB1335","CB1337","CB1338","CB1339","CB1340","CB1341","CB1342","CB1344","CB1345","CB1346","CB1348","CB1350","CB1352","CB1353","CB1354","CB1355","CB1356","CB1357","CB1359","CB1360","CB1361","CB1363","CB1365","CB1366","CB1368","CB1369","CB1370","CB1371","CB1372","CB1374","CB1375","CB1376","CB1377","CB1378","CB1379","CB1380","CB1381","CB1382","CB1383","CB1384","CB1385","CB1387","CB1389","CB1390","CB1391","CB1392","CB1393","CB1394_a","CB1394_b","CB1394_c","CB1394_d","CB1395","CB1396","CB1397","CB1399","CB1400","CB1401","CB1402","CB1403","CB1405","CB1406","CB1407","CB1408","CB1410","CB1412","CB1413","CB1414","CB1416","CB1417","CB1418","CB1419","CB1420","CB1421","CB1422","CB1423","CB1424","CB1425","CB1426","CB1427","CB1428","CB1429","CB1430","CB1431","CB1432","CB1433","CB1434","CB1435","CB1437","CB1438","CB1439","CB1440","CB1441","CB1442","CB1443","CB1444","CB1445","CB1446","CB1447","CB1448","CB1449","CB1450","CB1451","CB1452","CB1454","CB1455","CB1456","CB1457","CB1458","CB1459","CB1460","CB1461","CB1462","CB1463","CB1464","CB1466","CB1467","CB1468","CB1469","CB1470","CB1471","CB1472","CB1473","CB1474","CB1475","CB1476","CB1477","CB1478","CB1479","CB1481","CB1482","CB1483","CB1484","CB1485","CB1487","CB1488","CB1489","CB1490","CB1491","CB1492","CB1493","CB1494","CB1495","CB1496","CB1497","CB1498","CB1499","CB1500","CB1501","CB1502","CB1503","CB1504","CB1505","CB1506","CB1507","CB1508","CB1509","CB1510","CB1511","CB1512","CB1513","CB1514","CB1515","CB1516","CB1517","CB1518","CB1519","CB1520","CB1522","CB1523","CB1524","CB1527","CB1529","CB1531","CB1532","CB1533","CB1534","CB1537","CB1538","CB1539","CB1541","CB1542","CB1543","CB1544","CB1545","CB1546","CB1547","CB1548","CB1549","CB1550","CB1551","CB1552","CB1553","CB1554","CB1556","CB1557","CB1558","CB1559","CB1560","CB1562","CB1563","CB1564","CB1565","CB1566","CB1567","CB1568","CB1569","CB1570","CB1573","CB1574","CB1575","CB1576","CB1577","CB1578","CB1579","CB1580","CB1582","CB1583","CB1584","CB1585","CB1586","CB1587","CB1588","CB1589","CB1590","CB1591","CB1593","CB1594","CB1595","CB1596","CB1597","CB1599","CB1601","CB1603","CB1604","CB1605","CB1607","CB1608","CB1609","CB1610","CB1613","CB1614","CB1616","CB1617","CB1618","CB1619","CB1620","CB1621","CB1622","CB1624","CB1625","CB1626","CB1627","CB1628","CB1629","CB1630","CB1632","CB1635","CB1636","CB1637","CB1638","CB1640","CB1641","CB1642","CB1643","CB1644","CB1646","CB1647","CB1648","CB1649","CB1650","CB1652","CB1653","CB1654","CB1655","CB1656","CB1657","CB1658","CB1659","CB1660","CB1661","CB1662","CB1663","CB1664","CB1665","CB1666","CB1667","CB1668","CB1670","CB1671","CB1672","CB1673","CB1675","CB1676","CB1678","CB1679","CB1680","CB1681","CB1682","CB1683","CB1684","CB1685","CB1686","CB1687","CB1688","CB1691","CB1692","CB1693","CB1695","CB1696","CB1697","CB1698","CB1699","CB1700","CB1701","CB1702","CB1703","CB1704","CB1705","CB1706","CB1708","CB1709","CB1712","CB1713","CB1714","CB1716","CB1717","CB1718","CB1720","CB1721","CB1722","CB1724","CB1725","CB1726","CB1727","CB1728","CB1729","CB1730","CB1731","CB1733","CB1734","CB1735","CB1737","CB1738","CB1739","CB1740","CB1741","CB1742","CB1743","CB1744","CB1745","CB1747","CB1748","CB1750","CB1751","CB1752","CB1753","CB1754","CB1755","CB1757","CB1758","CB1759","CB1760","CB1761","CB1762","CB1764","CB1765","CB1766","CB1767","CB1769","CB1770","CB1771","CB1772","CB1774","CB1775","CB1776","CB1778","CB1779","CB1780","CB1781","CB1782","CB1783","CB1784","CB1785","CB1786_a","CB1786_b","CB1786_c","CB1787","CB1789","CB1790","CB1791","CB1792","CB1793","CB1794","CB1795","CB1797","CB1799","CB1800","CB1803","CB1804","CB1805","CB1807","CB1808","CB1809","CB1810","CB1811","CB1812","CB1814","CB1815","CB1816","CB1817a","CB1817b","CB1818","CB1819","CB1820","CB1821","CB1822","CB1823","CB1824","CB1825","CB1826","CB1827","CB1828","CB1829","CB1830","CB1831","CB1833","CB1834","CB1836","CB1837","CB1838","CB1839","CB1841","CB1842","CB1843","CB1844","CB1845","CB1846","CB1849","CB1850","CB1851","CB1852","CB1853","CB1854","CB1855","CB1856","CB1857","CB1858","CB1859","CB1860","CB1861","CB1864","CB1865","CB1866","CB1868","CB1869","CB1870","CB1871","CB1872","CB1873","CB1874","CB1875","CB1876","CB1877","CB1879","CB1880","CB1881","CB1883","CB1884","CB1885","CB1886","CB1887","CB1888","CB1889","CB1890","CB1891","CB1892","CB1893","CB1894","CB1895","CB1896","CB1897","CB1898","CB1899","CB1900","CB1901","CB1902","CB1903","CB1904","CB1905","CB1906","CB1908","CB1909","CB1910","CB1911","CB1912","CB1913","CB1914","CB1916","CB1917","CB1918","CB1919","CB1920","CB1921","CB1922","CB1923","CB1924","CB1925","CB1926","CB1927","CB1928","CB1929","CB1930","CB1931","CB1932","CB1933","CB1934","CB1935","CB1936","CB1937","CB1938","CB1939","CB1941","CB1942","CB1943","CB1944","CB1945","CB1946","CB1947","CB1948","CB1949","CB1950","CB1951","CB1952","CB1953","CB1955","CB1956","CB1957","CB1958","CB1959","CB1960","CB1961","CB1962","CB1963","CB1964","CB1965","CB1966","CB1967","CB1969","CB1970","CB1972","CB1973","CB1974","CB1975","CB1976","CB1977","CB1978","CB1979","CB1980","CB1981","CB1982","CB1983","CB1984","CB1985","CB1986","CB1987","CB1988","CB1989","CB1990","CB1991","CB1992","CB1993","CB1995","CB1996","CB1997","CB1999","CB2000","CB2001","CB2002","CB2003","CB2004","CB2005","CB2006","CB2007","CB2008","CB2009","CB2010","CB2011","CB2012","CB2013","CB2014","CB2015","CB2016","CB2017","CB2018","CB2019","CB2021","CB2022","CB2023","CB2024","CB2025","CB2026","CB2027","CB2029","CB2030","CB2031","CB2032","CB2033","CB2034","CB2035","CB2036","CB2037","CB2038","CB2039","CB2040","CB2041","CB2043","CB2044","CB2045","CB2046","CB2047","CB2048","CB2049","CB2050","CB2051","CB2053","CB2054","CB2055","CB2056","CB2057","CB2059","CB2060","CB2062","CB2063","CB2064","CB2065","CB2066","CB2067","CB2068","CB2069","CB2070","CB2071","CB2072","CB2074","CB2075","CB2076","CB2077","CB2078","CB2079","CB2080","CB2081","CB2082","CB2084","CB2085","CB2086","CB2087","CB2088","CB2089","CB2090","CB2092","CB2093","CB2094a","CB2094b","CB2095","CB2096","CB2097","CB2098","CB2099","CB2100","CB2101","CB2102","CB2103","CB2105","CB2106","CB2107","CB2108","CB2111","CB2112","CB2113","CB2114","CB2115","CB2116","CB2117","CB2118","CB2119","CB2120","CB2121","CB2122","CB2123","CB2124","CB2126","CB2127","CB2128","CB2129","CB2130","CB2131","CB2132","CB2133","CB2134","CB2135","CB2136","CB2137","CB2138","CB2139","CB2140","CB2141","CB2142","CB2143","CB2144","CB2145","CB2146","CB2147","CB2148","CB2149","CB2151","CB2152","CB2153","CB2154","CB2155","CB2156","CB2157","CB2159","CB2160","CB2161","CB2162","CB2163","CB2164","CB2165","CB2166","CB2167","CB2169","CB2170","CB2171","CB2172","CB2173","CB2174","CB2175","CB2176","CB2177","CB2178","CB2179","CB2180","CB2181","CB2182","CB2183","CB2184","CB2185","CB2186","CB2187","CB2188","CB2189","CB2190","CB2191","CB2192","CB2193","CB2194","CB2195","CB2196","CB2197","CB2198","CB2199","CB2200","CB2201","CB2202","CB2203","CB2204","CB2205","CB2206","CB2207","CB2208","CB2209","CB2211","CB2213","CB2214","CB2215","CB2216","CB2217","CB2218","CB2220","CB2224","CB2225","CB2226","CB2227","CB2228","CB2229","CB2230","CB2231","CB2232","CB2233","CB2235","CB2236","CB2237","CB2238","CB2240","CB2241","CB2242","CB2243","CB2244","CB2245","CB2246","CB2247","CB2248","CB2249","CB2250","CB2251","CB2252","CB2253","CB2254","CB2256","CB2257","CB2258","CB2259","CB2260","CB2261","CB2262","CB2263","CB2264","CB2265","CB2266","CB2267_a","CB2267_b","CB2267_c","CB2269","CB2270","CB2271","CB2273","CB2274","CB2276","CB2277","CB2278","CB2279","CB2280","CB2281","CB2282","CB2283","CB2284","CB2285","CB2286","CB2287","CB2288","CB2289","CB2290","CB2291","CB2292","CB2293","CB2294","CB2295","CB2296","CB2297","CB2298","CB2299","CB2300","CB2302","CB2303","CB2304","CB2305","CB2308","CB2309","CB2310","CB2311","CB2312","CB2313","CB2315","CB2316","CB2317","CB2319","CB2320","CB2321","CB2322","CB2323","CB2328","CB2329","CB2330","CB2331","CB2333","CB2334","CB2335","CB2336","CB2337","CB2338","CB2339","CB2340","CB2341","CB2342","CB2343","CB2344","CB2345","CB2346","CB2347","CB2348","CB2349","CB2350","CB2351","CB2352","CB2353","CB2354","CB2355","CB2357","CB2358","CB2360","CB2361","CB2362","CB2363","CB2364","CB2365","CB2366","CB2367","CB2368","CB2369","CB2370","CB2371","CB2372","CB2373","CB2374","CB2376","CB2377","CB2378","CB2379","CB2380","CB2382","CB2383","CB2384","CB2385","CB2386","CB2387","CB2388","CB2389","CB2390","CB2391","CB2392","CB2393","CB2395a","CB2395b","CB2396","CB2397","CB2398","CB2399","CB2401","CB2402","CB2403","CB2404","CB2406","CB2407","CB2408","CB2411","CB2412","CB2413","CB2414","CB2415","CB2416","CB2417","CB2419","CB2420","CB2421","CB2422","CB2423","CB2424","CB2425","CB2426","CB2427","CB2428","CB2429","CB2430","CB2431","CB2432","CB2433","CB2434","CB2436","CB2437","CB2438","CB2439","CB2440","CB2442","CB2443","CB2444","CB2446","CB2447","CB2448","CB2449","CB2450","CB2451","CB2452","CB2453","CB2455","CB2456","CB2457","CB2458","CB2459","CB2460","CB2461","CB2462","CB2463","CB2465","CB2466","CB2467","CB2468","CB2469","CB2470","CB2471","CB2472","CB2473","CB2474","CB2475","CB2476","CB2477","CB2478","CB2479","CB2480","CB2481","CB2482","CB2485","CB2487","CB2488","CB2489","CB2490","CB2491","CB2492","CB2493","CB2494","CB2495","CB2497","CB2498","CB2500","CB2501","CB2502","CB2503","CB2504","CB2505","CB2506","CB2507","CB2509","CB2510","CB2512","CB2513","CB2514","CB2515","CB2516","CB2517","CB2518","CB2519","CB2520","CB2521","CB2522","CB2523","CB2524","CB2525","CB2526","CB2527","CB2528","CB2529","CB2530","CB2531","CB2532","CB2533","CB2534","CB2535","CB2537","CB2538","CB2539","CB2541","CB2542","CB2543","CB2544","CB2545","CB2547","CB2548","CB2549","CB2550","CB2551","CB2552","CB2553","CB2554","CB2555","CB2556","CB2557","CB2558","CB2559","CB2560","CB2561","CB2563","CB2564","CB2565","CB2566","CB2567","CB2568","CB2569","CB2571","CB2572","CB2573","CB2574","CB2575","CB2576","CB2577","CB2579","CB2580","CB2581","CB2582","CB2583","CB2584","CB2585","CB2587","CB2588","CB2589","CB2591","CB2592","CB2593","CB2594","CB2595","CB2596","CB2598","CB2599","CB2600","CB2602","CB2604","CB2605","CB2606","CB2607","CB2608","CB2610","CB2611","CB2612","CB2613","CB2615","CB2616","CB2617","CB2618","CB2619","CB2620","CB2621","CB2623","CB2624","CB2625","CB2626","CB2627","CB2628","CB2629","CB2630","CB2632","CB2633","CB2634","CB2635","CB2636","CB2637","CB2638","CB2639","CB2640","CB2642","CB2643","CB2644","CB2645","CB2646","CB2647","CB2648","CB2649","CB2650","CB2651","CB2652","CB2653","CB2655","CB2656","CB2657","CB2659","CB2660","CB2661","CB2662","CB2663","CB2664","CB2665","CB2666","CB2667","CB2668","CB2669","CB2670","CB2671","CB2672","CB2673","CB2674","CB2675","CB2676","CB2677","CB2678","CB2679","CB2680","CB2681","CB2682","CB2683","CB2684","CB2685","CB2687","CB2688","CB2689","CB2690","CB2691","CB2692","CB2693","CB2694","CB2695","CB2696","CB2697","CB2698","CB2699","CB2700","CB2701","CB2702","CB2703","CB2706","CB2707","CB2708","CB2709","CB2710","CB2711","CB2712","CB2713","CB2714","CB2715","CB2716","CB2717","CB2718","CB2719","CB2720","CB2721","CB2723","CB2724","CB2725","CB2726","CB2728","CB2729","CB2731","CB2733","CB2735","CB2736","CB2737","CB2738","CB2739","CB2741","CB2743","CB2744","CB2745","CB2746","CB2747","CB2748","CB2749","CB2750","CB2751","CB2752","CB2754","CB2755","CB2756","CB2757","CB2758","CB2759","CB2760","CB2761","CB2762","CB2763","CB2764","CB2765","CB2766","CB2767","CB2769","CB2770","CB2771","CB2772","CB2773","CB2774","CB2776","CB2777","CB2778","CB2779","CB2780","CB2781","CB2782","CB2783","CB2784","CB2785","CB2786","CB2787","CB2789","CB2790","CB2791","CB2792","CB2793","CB2795","CB2796","CB2797","CB2798","CB2800","CB2801","CB2802","CB2803","CB2804","CB2805","CB2806","CB2808","CB2809","CB2810","CB2811","CB2812","CB2813","CB2814","CB2816","CB2817","CB2819","CB2820","CB2821","CB2823","CB2824","CB2825","CB2826","CB2828","CB2829","CB2831","CB2834","CB2835","CB2836","CB2840","CB2841","CB2842","CB2843","CB2844","CB2845","CB2846","CB2847","CB2848","CB2849","CB2850","CB2851","CB2853","CB2854","CB2855","CB2856","CB2858","CB2859","CB2860","CB2861","CB2862","CB2863","CB2864","CB2865","CB2866","CB2867","CB2868_a","CB2868_b","CB2869","CB2870","CB2872","CB2873","CB2874","CB2876","CB2877","CB2878","CB2879","CB2880","CB2881","CB2883","CB2884","CB2885","CB2886","CB2887","CB2888","CB2889","CB2891","CB2892","CB2893","CB2894","CB2895","CB2896","CB2897","CB2898","CB2899","CB2901","CB2902","CB2903","CB2904","CB2905","CB2906","CB2907","CB2908","CB2909","CB2910","CB2911","CB2912","CB2913","CB2914","CB2915","CB2917","CB2918","CB2919","CB2920","CB2921","CB2922","CB2923","CB2924","CB2925","CB2926","CB2927","CB2928","CB2929","CB2930","CB2931","CB2932","CB2933","CB2934","CB2935","CB2936","CB2937","CB2938","CB2940","CB2941","CB2942","CB2943","CB2944","CB2945","CB2946","CB2947","CB2948","CB2949","CB2950","CB2951","CB2952","CB2953","CB2954","CB2955","CB2956","CB2957","CB2958","CB2960","CB2961","CB2962","CB2962a","CB2963","CB2965","CB2966","CB2967","CB2968","CB2969","CB2970","CB2971","CB2972","CB2973","CB2974","CB2975","CB2976","CB2977","CB2978","CB2979","CB2980","CB2981","CB2982","CB2983","CB2984","CB2985","CB2987","CB2988","CB2989","CB2991","CB2992","CB2993","CB2995","CB2996","CB2997","CB2998","CB2999","CB3000","CB3001","CB3002","CB3003","CB3004","CB3005","CB3006","CB3007","CB3008","CB3009","CB3010","CB3011","CB3012","CB3013","CB3014","CB3015","CB3016","CB3017","CB3018","CB3019","CB3020","CB3021","CB3023","CB3024","CB3026","CB3029","CB3030","CB3031","CB3032","CB3033","CB3034","CB3035","CB3036","CB3037","CB3038","CB3040","CB3041","CB3042","CB3043","CB3044","CB3045","CB3046","CB3047","CB3048","CB3049","CB3050","CB3051","CB3052","CB3054","CB3055","CB3056","CB3057","CB3058","CB3060","CB3061","CB3063","CB3064","CB3065","CB3066","CB3067","CB3069","CB3071","CB3072","CB3073","CB3074","CB3075","CB3076","CB3077","CB3079","CB3080","CB3081","CB3082","CB3083","CB3084","CB3085","CB3087","CB3088","CB3089","CB3092","CB3093","CB3094","CB3095","CB3098","CB3099","CB3102","CB3103","CB3104","CB3105","CB3106","CB3107","CB3108","CB3109","CB3110","CB3111","CB3112","CB3113","CB3114","CB3115","CB3117","CB3118","CB3119","CB3120","CB3121","CB3122","CB3123","CB3124","CB3125","CB3126","CB3127","CB3129","CB3130","CB3131","CB3132","CB3133","CB3134a","CB3134b","CB3135","CB3136","CB3138","CB3140","CB3141","CB3142","CB3143","CB3145","CB3146","CB3147","CB3148","CB3149","CB3150","CB3151","CB3152","CB3153","CB3154","CB3155","CB3156","CB3157","CB3158","CB3160","CB3162","CB3163","CB3164","CB3166","CB3168","CB3169","CB3171","CB3172","CB3173","CB3174","CB3175","CB3176","CB3177","CB3178","CB3179","CB3180","CB3181","CB3182","CB3183","CB3184","CB3185","CB3186","CB3187","CB3189","CB3190","CB3191","CB3192","CB3193","CB3194","CB3195","CB3196","CB3197","CB3198","CB3199","CB3200","CB3200b","CB3201","CB3202","CB3203","CB3204","CB3205","CB3206","CB3207","CB3208","CB3209","CB3210","CB3211","CB3212","CB3214","CB3215","CB3218","CB3219","CB3220","CB3221","CB3223","CB3224","CB3225","CB3226","CB3227","CB3228","CB3229","CB3230","CB3231","CB3233","CB3234","CB3235","CB3236","CB3238","CB3239","CB3240","CB3241","CB3242","CB3243","CB3244","CB3245","CB3248","CB3249","CB3250","CB3251","CB3252","CB3253","CB3254","CB3255","CB3256","CB3257","CB3260","CB3261","CB3263","CB3264","CB3267","CB3268","CB3269","CB3270","CB3272","CB3273","CB3274","CB3275a","CB3275b","CB3276","CB3277","CB3278","CB3279","CB3280","CB3281","CB3283","CB3284","CB3285","CB3286","CB3287","CB3288","CB3289","CB3290","CB3291","CB3292","CB3293","CB3294","CB3295","CB3297","CB3298","CB3299","CB3300","CB3302","CB3304","CB3305","CB3306","CB3308","CB3309","CB3310","CB3312","CB3313","CB3314","CB3315","CB3316","CB3317","CB3318","CB3319","CB3320","CB3321","CB3322","CB3323","CB3324","CB3325","CB3326","CB3327","CB3328","CB3329","CB3330","CB3331","CB3332","CB3335","CB3336","CB3337","CB3339","CB3340","CB3341","CB3342","CB3343","CB3344","CB3345","CB3346","CB3347","CB3348","CB3349","CB3351","CB3352","CB3353","CB3354","CB3355","CB3356","CB3357","CB3358","CB3359","CB3360","CB3361","CB3362","CB3363","CB3364","CB3365","CB3366","CB3368","CB3369","CB3370","CB3371","CB3372","CB3373","CB3374","CB3376","CB3377","CB3378","CB3379","CB3380","CB3381","CB3382","CB3383","CB3384","CB3385","CB3386","CB3387","CB3388","CB3390","CB3391","CB3392","CB3393","CB3394","CB3395","CB3396","CB3398","CB3399","CB3400","CB3401","CB3402","CB3403","CB3404","CB3405","CB3406","CB3407","CB3408","CB3409","CB3410","CB3411","CB3412","CB3413","CB3414","CB3415","CB3416","CB3417","CB3418","CB3419","CB3422","CB3423","CB3424","CB3425","CB3426","CB3427","CB3428","CB3429","CB3430","CB3431","CB3432","CB3433","CB3434","CB3435","CB3436","CB3437","CB3438","CB3439","CB3441","CB3442","CB3444","CB3445","CB3446","CB3447","CB3448","CB3449","CB3450","CB3452","CB3453","CB3454","CB3455","CB3456","CB3457","CB3458","CB3459","CB3461","CB3462","CB3463","CB3464","CB3465","CB3466","CB3467","CB3468","CB3469","CB3470","CB3471","CB3472","CB3473","CB3474","CB3476","CB3477","CB3479","CB3480","CB3482","CB3483","CB3484","CB3485","CB3486","CB3487","CB3488","CB3489","CB3491","CB3492","CB3493","CB3496","CB3497","CB3498","CB3499","CB3500","CB3501","CB3502","CB3503","CB3504","CB3505","CB3506","CB3507","CB3508","CB3509","CB3510","CB3512","CB3513a","CB3513b","CB3514","CB3515","CB3516","CB3517","CB3518","CB3519","CB3520","CB3521","CB3522","CB3523","CB3524","CB3525","CB3527","CB3528","CB3529","CB3530","CB3531","CB3532","CB3533","CB3534","CB3535","CB3536","CB3537","CB3538","CB3539","CB3540","CB3541","CB3544","CB3545","CB3546","CB3547","CB3548","CB3549","CB3550","CB3551","CB3552","CB3553","CB3554","CB3555","CB3556","CB3557","CB3559","CB3560","CB3561","CB3562","CB3564","CB3565","CB3566","CB3567","CB3568","CB3569","CB3570","CB3571","CB3572","CB3573","CB3574","CB3575","CB3576","CB3577","CB3578","CB3579","CB3580","CB3581","CB3582","CB3584","CB3587","CB3588","CB3589","CB3590","CB3591","CB3592","CB3593","CB3594","CB3595","CB3598","CB3599","CB3600","CB3601","CB3603","CB3604","CB3605","CB3606","CB3607","CB3608","CB3609","CB3610","CB3611","CB3612","CB3613","CB3614","CB3615","CB3617","CB3619","CB3621","CB3622","CB3623","CB3624","CB3625","CB3626","CB3627","CB3628","CB3629","CB3630","CB3631","CB3632","CB3633","CB3635","CB3636","CB3637","CB3638","CB3639","CB3640","CB3641","CB3642","CB3643","CB3645","CB3646","CB3648","CB3649","CB3650","CB3651","CB3652","CB3653","CB3654","CB3655","CB3656","CB3657","CB3658","CB3659","CB3660","CB3661","CB3662","CB3663","CB3664","CB3665","CB3666","CB3667","CB3668","CB3669","CB3670","CB3671","CB3672","CB3673a","CB3673b","CB3674","CB3675","CB3676","CB3678","CB3679","CB3680","CB3682","CB3683","CB3684","CB3685","CB3686","CB3687","CB3690","CB3691","CB3692","CB3693","CB3694","CB3695","CB3696","CB3697","CB3698","CB3699","CB3700","CB3701","CB3703","CB3705","CB3706","CB3707","CB3708","CB3709","CB3710","CB3713","CB3714","CB3715","CB3716","CB3717","CB3720","CB3723","CB3724","CB3726","CB3727","CB3728","CB3729","CB3730","CB3732","CB3733","CB3734","CB3735","CB3737","CB3738","CB3739","CB3740","CB3741","CB3742","CB3743","CB3744","CB3745","CB3746","CB3747","CB3748","CB3749","CB3750","CB3751","CB3753","CB3754","CB3755","CB3758","CB3759","CB3760","CB3761","CB3762","CB3763","CB3764","CB3765","CB3766","CB3767","CB3768","CB3770","CB3771","CB3772","CB3773","CB3774","CB3775","CB3776","CB3777","CB3778","CB3779","CB3780","CB3781","CB3782","CB3784","CB3787","CB3788","CB3789","CB3790","CB3791","CB3792","CB3793","CB3794","CB3796","CB3797","CB3798","CB3799","CB3800","CB3801","CB3802","CB3803","CB3804","CB3805","CB3808","CB3809","CB3811","CB3812","CB3813","CB3814","CB3858","CB3859","CB3860","CB3861","CB3862","CB3863","CB3865","CB3866","CB3867","CB3868","CB3869","CB3870","CB3871","CB3872","CB3873","CB3874","CB3875","CB3876","CB3877","CB3878","CB3879","CB3880","CB3881","CB3882","CB3883","CB3884","CB3885","CB3886","CB3887","CB3888","CB3889","CB3890","CB3892a","CB3892b","CB3895","CB3896","CB3897","CB3898","CB3899","CB3900","CB3901","CB3902","CB3903","CB3904","CB3905","CB3906","CB3907","CB3908","CB3909","CB3910","CB3911","CB3912","CB3913","CB3914","CB3915","CB3916","CB3917","CB3918","CB3919","CB3920","CB3921","CB3922","CB3923","CB3924","CB3925","CB3930","CB3931","CB3932","CB3936","CB3937","CB3941","CB3951","CB3952","CB3953","CB3954","CB3955","CB3956","CB3958","CB3959","CB3966","CB3968","CB3977","CB3978","CB3983","CB3992","CB4014","CB4045","CB4053","CB4055","CB4058","CB4068","CB4073","CB4075","CB4094","CB4103","CB4105","CB4113","CB4130","CB4141","CB4146","CB4147","CB4148","CB4149","CB4159","CB4161","CB4171","CB4176","CB4186","CB4187","CB4188","CB4191","CB4192","CB4193","CB4198","CB4202","CB4203","CB4204","CB4210","CB4211","CB4212","CB4213","CB4218","CB4219","CB4220","CB4229","CB4230","CB4233","CB4235","CB4236","CB4237","CB4238","CB4240","CB4241","CB4242","CB4243","CB4244","CB4245","CB4246","CB4247","CB4248","CEM","CL001","CL002","CL003","CL004","CL005","CL006","CL007","CL008","CL009","CL010","CL011","CL012","CL013","CL014","CL015","CL016","CL018a","CL018b","CL021","CL022","CL023","CL024a","CL024b","CL025","CL026","CL027","CL028","CL029a","CL029b","CL030","CL031","CL032","CL036","CL037","CL038","CL042","CL048","CL053","CL055","CL057,CL106","CL058","CL059","CL060","CL062_a","CL062_b","CL063","CL064","CL065","CL066","CL067","CL068","CL069","CL070a","CL070b","CL071a","CL071b","CL072","CL073","CL074","CL075a","CL075b","CL077","CL078a","CL078b","CL080","CL081","CL083","CL085_a","CL085_b","CL086_a,CL086_d","CL086_b","CL086_c","CL086_e","CL087","CL089_a","CL089_b","CL089_c","CL090_a","CL090_b","CL090_c","CL090_e","CL091","CL092","CL093","CL094","CL095","CL096","CL097","CL098","CL099a","CL099b","CL099c","CL100","CL101","CL102","CL104","CL107","CL108","CL109","CL110","CL111","CL112","CL113","CL114","CL115","CL116","CL118","CL120a","CL120b","CL121_a","CL122_a","CL123,CRE061","CL126","CL127","CL128a","CL128b","CL128c","CL129","CL130","CL131","CL132","CL133","CL135","CL136","CL140","CL141","CL142","CL143","CL144","CL146","CL149","CL150","CL151","CL152","CL153","CL154","CL155","CL156","CL157","CL158","CL159","CL160","CL160a","CL160b","CL161a","CL161b","CL162","CL165","CL166,CL168","CL169","CL170","CL171","CL172","CL173","CL175","CL176","CL177","CL178","CL179","CL180","CL182","CL183","CL186","CL187","CL195","CL196a","CL196b","CL199","CL200","CL201","CL203","CL204","CL205","CL208","CL209","CL210","CL210_a","CL211","CL212","CL213","CL214","CL215","CL216","CL228,SMP491","CL231,CL238","CL234","CL235","CL236","CL237","CL239","CL244","CL245","CL246","CL248","CL250","CL251","CL252","CL253","CL254","CL255","CL256","CL257","CL258","CL259, CL260","CL261a","CL261b","CL263","CL264","CL265","CL266_a","CL266_b","CL267","CL268","CL269","CL270a","CL270b","CL271","CL272_a","CL272_b","CL273","CL282","CL283a","CL283b","CL283c","CL286","CL287","CL288","CL289","CL290","CL291","CL292a","CL292b","CL293","CL294","CL301,CL302","CL303","CL308","CL309","CL310","CL311","CL312","CL313","CL314","CL315","CL316","CL317","CL318","CL319","CL321","CL322","CL323a","CL323b","CL326","CL327","CL328,IB070,IB071","CL333","CL335","CL336","CL339","CL340","CL344","CL348","CL352","CL353","CL356","CL359","CL360","CL361","CL362","CL364","CRE001","CRE004","CRE005","CRE006","CRE007","CRE008,CRE010","CRE009","CRE011","CRE012","CRE013","CRE015","CRE016","CRE017","CRE018","CRE019","CRE020","CRE021","CRE022","CRE023","CRE024","CRE025","CRE027","CRE035","CRE040","CRE041","CRE042","CRE043","CRE044","CRE045,CRE046","CRE048","CRE049","CRE050","CRE056","CRE059","CRE060,CRE067","CRE062","CRE065","CRE066","CRE068","CRE069","CRE070","CRE071","CRE072","CRE074","CRE075","CRE076","CRE077","CRE078","CRE079","CRE080a","CRE080b","CRE080c","CRE081","CRE082","CRE087","CRE088","CRE094","CRE095a","CRE095b","CRE096","CRE100","CRE102","CRE103a","CRE103b","CRE104","CRE105","CRE106","CRE107","CRE108","CREa1A_T01","CRZ","CRZ01,CRZ02","CSD","CT1","DA1_lPN","DA1_vPN","DA2_lPN","DA3_adPN","DA4l_adPN","DA4m_adPN","DC1_adPN","DC2_adPN","DC3_adPN","DC4_adPN","DC4_vPN","DCH","DGI","DH31","DH44","DL1_adPN","DL2d_adPN","DL2d_vPN","DL2v_adPN","DL3_lPN","DL4_adPN","DL5_adPN","DM1_lPN","DM2_lPN","DM3_adPN","DM3_vPN","DM4_adPN","DM4_vPN","DM5_lPN","DM6_adPN","DMS","DN1-l","DN1a","DN1pA","DN1pB","DNa01","DNa02","DNa03","DNa04","DNa05","DNa06","DNa07","DNa08","DNa09","DNa10","DNa11","DNa13","DNa14","DNa15","DNa16","DNae001","DNae002","DNae003","DNae004","DNae005","DNae006","DNae007","DNae008","DNae009","DNae010","DNb01","DNb02","DNb03","DNb04","DNb05","DNb06","DNb07","DNb08","DNb09","DNbe001","DNbe002","DNbe003","DNbe004","DNbe005","DNbe006","DNbe007","DNc01","DNc02","DNd02","DNd03","DNd04","DNd05","DNde001","DNde002","DNde003","DNde005","DNde006","DNde007","DNg01","DNg02_a","DNg02_b","DNg02_c","DNg02_d","DNg02_e","DNg02_f","DNg02_g","DNg02_h","DNg03","DNg04","DNg05_a","DNg05_b","DNg06","DNg07","DNg08_a","DNg08_b","DNg09","DNg10","DNg100","DNg101","DNg102","DNg103","DNg104","DNg105","DNg106","DNg107","DNg108","DNg109","DNg11","DNg110","DNg111","DNg12_a","DNg12_b","DNg12_c","DNg12_d","DNg12_e","DNg13","DNg14","DNg15","DNg16","DNg17","DNg18_a","DNg18_b","DNg19","DNg20","DNg21","DNg22","DNg23","DNg24","DNg26","DNg27","DNg28","DNg29","DNg30","DNg31","DNg32","DNg33","DNg34","DNg35","DNg36_a","DNg36_b","DNg37","DNg38","DNg39","DNg40","DNg41","DNg42","DNg43","DNg44","DNg45","DNg46","DNg47","DNg48","DNg49","DNg50","DNg51","DNg52","DNg53","DNg54","DNg55","DNg56","DNg57","DNg58","DNg59","DNg60","DNg61","DNg62","DNg63","DNg64","DNg65","DNg66","DNg67","DNg68","DNg69","DNg70","DNg71","DNg72","DNg73","DNg74_a","DNg74_b","DNg75","DNg76","DNg77","DNg78","DNg79","DNg80","DNg81","DNg82","DNg83","DNg84","DNg85","DNg86","DNg87","DNg88","DNg89","DNg90","DNg91","DNg92_a","DNg92_b","DNg93","DNg94","DNg95","DNg96","DNg97","DNg98","DNg99","DNge001","DNge002","DNge003","DNge004","DNge005","DNge006","DNge007","DNge008","DNge009","DNge010","DNge011","DNge012","DNge013","DNge014","DNge015","DNge016","DNge017","DNge018","DNge019","DNge020","DNge021","DNge022","DNge023","DNge024","DNge025","DNge026","DNge027","DNge028","DNge029","DNge030","DNge031","DNge032","DNge033","DNge034","DNge035","DNge036","DNge037","DNge038","DNge039","DNge040","DNge041","DNge042","DNge043","DNge044","DNge045","DNge046","DNge047","DNge048","DNge049","DNge050","DNge051","DNge052","DNge053","DNge054","DNge055","DNge056","DNge057","DNge058","DNge059","DNge060","DNge061","DNge062","DNge063","DNge064","DNge065","DNge067","DNge068","DNge069","DNge070","DNge071","DNge072","DNge073","DNge074","DNge075","DNge076","DNge077","DNge078","DNge079","DNge080","DNge081","DNge082","DNge083","DNge084","DNge085","DNge086","DNge087","DNge088","DNge089","DNge090","DNge091","DNge092","DNge093","DNge094","DNge095","DNge096","DNge097","DNge098","DNge099","DNge100","DNge101","DNge102","DNge103","DNge104","DNge105","DNge106","DNge107","DNge108","DNge109","DNge110","DNge111","DNge112","DNge113","DNge114","DNge115","DNge116","DNge117","DNge118","DNge119","DNge120","DNge121","DNge122","DNge123","DNge124","DNge125","DNge126","DNge127","DNge128","DNge129","DNge130","DNge131","DNge132","DNge133","DNge134","DNge135","DNge136","DNge137","DNge138","DNge139","DNge140","DNge141","DNge142","DNge143","DNge144","DNge145","DNge146","DNge147","DNge148","DNge149","DNge150","DNge151","DNge152","DNge154","DNge156","DNge172","DNge173","DNge174","DNge175","DNp01","DNp02","DNp03","DNp04","DNp05","DNp06","DNp07","DNp08","DNp09","DNp10","DNp101","DNp102","DNp103","DNp104","DNp11","DNp12","DNp13","DNp14","DNp15","DNp16","DNp17","DNp18","DNp19","DNp20","DNp22","DNp23","DNp24","DNp25","DNp26","DNp27","DNp28","DNp29","DNp30","DNp31","DNp32","DNp33","DNp34","DNp35","DNp36","DNp37","DNp38","DNp39","DNp40","DNp41","DNp42","DNp43","DNp44","DNp45","DNp46","DNp47","DNp48","DNp49","DNp51","DNp52","DNp53","DNp54","DNp55","DNp56","DNp57","DNp58","DNp59","DNp60","DNp62","DNp63","DNp64","DNp65","DNp66","DNp67","DNp68","DNp69","DNp70","DNp71","DNp72","DNp73","DNpe001","DNpe002","DNpe003","DNpe004","DNpe005","DNpe006","DNpe007","DNpe008","DNpe009","DNpe010","DNpe011","DNpe012","DNpe013","DNpe014","DNpe015","DNpe016","DNpe017","DNpe018","DNpe019","DNpe020","DNpe021","DNpe022","DNpe023","DNpe024","DNpe025","DNpe026","DNpe027","DNpe028","DNpe029","DNpe030","DNpe031","DNpe032","DNpe033","DNpe034","DNpe035","DNpe036","DNpe037","DNpe038","DNpe039","DNpe040","DNpe041","DNpe042","DNpe043","DNpe044","DNpe045","DNpe046","DNpe047","DNpe048","DNpe049","DNpe050","DNpe052","DNpe053","DNpe054","DNpe055","DNpe056","DNx01","DNx02","DNxl114","DP1l_adPN","DP1l_vPN","DP1m_adPN","DP1m_vPN","DPM","DSKMP3","D_adPN","Delta7","Dm1","Dm10","Dm11","Dm12","Dm13","Dm14","Dm15","Dm16","Dm17","Dm18","Dm19","Dm2","Dm20","Dm3p","Dm3q","Dm3v","Dm4","Dm6","Dm8","Dm9","DmDRA1","DmDRA2","EL","ENS1","ENS2","ENS3","ENS4","ENS5","EPG","EPGt","ER1","ER2","ER3a_a,ER3a_d","ER3a_b,ER3a_c","ER3d","ER3m","ER3p_a","ER3p_b","ER3w","ER4d","ER4m","ER5","ER6","ExR1","ExR2_1","ExR2_2","ExR3","ExR4","ExR5","ExR6","ExR7","ExR8","FB1A","FB1B","FB1C","FB1D","FB1E","FB1F","FB1G","FB1H","FB1I,FB1J","FB2A","FB2B","FB2B_b","FB2C","FB2D","FB2E","FB2F_b","FB2F_c","FB2F_d","FB2G","FB2G_a","FB2H_a,FB2I_b","FB2H_b","FB2I_a","FB2J_a,FB2J_c","FB2J_b","FB2K","FB2L","FB2M","FB3A","FB3B,FB3C,FB3E","FB3D","FB4A","FB4B","FB4C","FB4D","FB4E","FB4F","FB4F_a,FB4F_b,FB4F_c","FB4G","FB4H","FB4I","FB4J","FB4K","FB4L","FB4M","FB4N","FB4O","FB4P,FB4Q","FB4P_a","FB4Q_b","FB4R","FB4X","FB4Y","FB4Z","FB4_unclear","FB5A","FB5AA","FB5AB","FB5B","FB5C","FB5D,FB5E","FB5F","FB5G","FB5H","FB5I","FB5J","FB5K","FB5L","FB5M","FB5N","FB5O","FB5P,FB5T","FB5Q","FB5R,FB5U","FB5S","FB5V","FB5W","FB5X","FB5Y","FB5Z","FB6,FB6J","FB6A","FB6A_c","FB6B","FB6C","FB6D","FB6E","FB6F","FB6G","FB6H","FB6I","FB6K","FB6L","FB6M","FB6N","FB6O","FB6P","FB6Q","FB6R","FB6S","FB6T","FB6U","FB6V","FB6W","FB6X","FB6Y","FB6Z","FB7A","FB7B","FB7C","FB7D","FB7E","FB7F","FB7G,FB7I","FB7H","FB7J","FB7K","FB7L","FB7M","FB8A,FB8H","FB8B","FB8C","FB8D","FB8E","FB8F_a","FB8F_b","FB8G","FB8I","FB9A","FB9B","FB9C","FC1A,FC1B,FC1F","FC1C,FC1E","FC1D","FC2A","FC2B","FC2C","FC3","FLA100f","FLA101f_a","FLA101f_b","FLA101f_c","FLA101f_d","FR1","FR2","FS1A","FS1B","FS2","FS3","FS4A","FS4B","FS4C","GLNO","GNG800f","H01","H03","H1","H2","HBeyelet","HRN_VP1d","HRN_VP1l","HRN_VP4","HRN_VP5","HSE","HSN","HSS","Hugin-RG","IB005","IB007","IB008","IB009","IB010","IB012","IB015","IB016","IB017","IB018","IB020","IB021","IB022","IB023","IB024","IB025","IB026","IB031","IB032","IB033,IB039","IB038","IB044","IB045","IB047","IB048","IB049","IB050","IB051","IB054","IB058","IB059a","IB059b","IB060","IB061","IB062","IB064","IB065","IB066","IB068","IB069","IB076","IB084","IB092","IB093","IB094","IB095","IB097","IB110","IB114","IB115","IB116","IB117","IB118","IPC","ISN","ITP","IbSpsP","JO","JO-A1","JO-A2","JO-A3","JO-A4","JO-A5","JO-B1_a","JO-B1_b","JO-B1_c","JO-B2","JO-B3","JO-B4_a","JO-B4_b","JO-CA1","JO-CA2","JO-CL","JO-CM","JO-DA","JO-DP","JO-ED1","JO-ED2_a","JO-ED2_b","JO-ED2_c","JO-EV1","JO-EV2","JO-EV3","JO-EV4","JO-EV5","JO-EV6","JO-FD1","JO-FD2","JO-FV","JO-mz","JO-unclear","KCa'b'-ap1","KCab","KCab-p","KCapbp-ap1","KCapbp-ap2","KCapbp-m","KCg-d","KCg-m","KCg-s1","KCg-s2","KCg-s3","L1","L1-3","L2","L3","L4","L5","LAL001","LAL002","LAL003,LAL044","LAL004","LAL006","LAL007","LAL008","LAL009","LAL010","LAL011","LAL012","LAL013","LAL014","LAL015","LAL016","LAL017","LAL018","LAL019","LAL020","LAL021","LAL022","LAL023","LAL024","LAL025","LAL026","LAL027","LAL028, LAL029","LAL030a","LAL030b","LAL030c","LAL030d","LAL031","LAL034","LAL035","LAL037","LAL038","LAL040","LAL042","LAL043a","LAL043b","LAL043c","LAL045","LAL046","LAL047","LAL048","LAL049","LAL051","LAL052","LAL053","LAL054","LAL055","LAL056","LAL059","LAL072","LAL073","LAL074,LAL084","LAL075","LAL076","LAL081","LAL082","LAL085","LAL086","LAL087","LAL088","LAL089","LAL090","LAL091","LAL093","LAL094","LAL096,LAL097","LAL098","LAL099","LAL100","LAL101","LAL102","LAL103,LAL109","LAL104,LAL105","LAL110","LAL111,PS060","LAL112","LAL113","LAL114","LAL115","LAL116","LAL117a","LAL117b","LAL119","LAL120a","LAL120b","LAL121","LAL122","LAL123","LAL124","LAL125,LAL108","LAL126","LAL127","LAL128","LAL129","LAL130","LAL131a","LAL131b","LAL132a","LAL132b","LAL133a","LAL133b","LAL135","LAL137","LAL138","LAL139","LAL140","LAL141","LAL142","LAL143","LAL144a","LAL144b","LAL145","LAL146","LAL147a","LAL147b","LAL147c","LAL148","LAL149","LAL150a","LAL150b","LAL151","LAL152","LAL153","LAL154","LAL155","LAL156a","LAL156b","LAL157","LAL158","LAL159","LAL160,LAL161","LAL162","LAL163,LAL164","LAL165","LAL167a","LAL167b","LAL168a","LAL168b","LAL169","LAL170","LAL171,LAL172","LAL173,LAL174","LAL175","LAL176,LAL177","LAL179a","LAL179b","LAL180","LAL181","LAL182","LAL183","LAL184","LAL185","LAL186","LAL187","LAL188","LAL190","LAL191","LAL192","LAL193","LAL194","LAL195","LAL196","LAL197","LAL198","LAL199","LAL200","LAL203","LB1a","LB1b","LB1c","LB1d","LB1e","LB2a","LB2b","LB2c","LB3","LB3a","LB3b","LB3c","LB3d","LB4a","LB4b","LC10a","LC10b","LC10c-1","LC10c-2","LC10d","LC10e","LC10f","LC11","LC12","LC13","LC14a1","LC14a2","LC14b","LC15","LC16","LC17","LC18","LC19","LC20a","LC20b","LC21","LC22","LC24","LC25","LC26","LC27","LC28a","LC28b","LC28c","LC28d","LC29","LC31a","LC31b","LC31c","LC33","LC34","LC35","LC36","LC37","LC39","LC4","LC40","LC41","LC43","LC44","LC45a","LC45b","LC46","LC6","LC9","LCNOp","LCNOpm","LCe01a","LCe01b","LCe02","LCe03","LCe04","LCe05","LCe06","LCe07","LCe08","LCe09","LHAD1a1","LHAD1a2","LHAD1a3,LHAD1f5","LHAD1a4a","LHAD1a4b","LHAD1a4c","LHAD1b1_b","LHAD1b2_a,LHAD1b2_c","LHAD1b3","LHAD1b4","LHAD1b5","LHAD1c2a","LHAD1c2b","LHAD1c2c","LHAD1c3","LHAD1d1","LHAD1d2","LHAD1f1a","LHAD1f1b","LHAD1f2","LHAD1f3a","LHAD1f3b","LHAD1f3c","LHAD1f3d","LHAD1f4a","LHAD1f4b","LHAD1f4c","LHAD1g1","LHAD1h1","LHAD1j1","LHAD1k1","LHAD2b1","LHAD2c1","LHAD2c2","LHAD2c3a","LHAD2c3b","LHAD2c3c","LHAD2d1","LHAD2e1","LHAD2e3","LHAD3a10","LHAD3a8","LHAD3d4","LHAD3g1","LHAD4a1","LHAV1a1","LHAV1a3","LHAV1a4","LHAV1b1","LHAV1b3","LHAV1d1","LHAV1d2","LHAV1e1","LHAV2a3a","LHAV2a3b","LHAV2a3c","LHAV2b1","LHAV2b10","LHAV2b11","LHAV2b2a","LHAV2b2b","LHAV2b6","LHAV2b7_a","LHAV2b7_b","LHAV2b9","LHAV2d1","LHAV2f2_a","LHAV2f2_b","LHAV2g1a","LHAV2g1b","LHAV2g2_a","LHAV2g2_b","LHAV2g3","LHAV2g5","LHAV2k10","LHAV2k13","LHAV2k6","LHAV2k8","LHAV2m1","LHAV2n1","LHAV2o1","LHAV2p1","LHAV3a1","LHAV3a1_c","LHAV3b12","LHAV3c1","LHAV3d1","LHAV3e2","LHAV3e3a","LHAV3e3b","LHAV3e6","LHAV3f1","LHAV3g1","LHAV3g2","LHAV3h1","LHAV3i1","LHAV3j1","LHAV3k1","LHAV3k2","LHAV3k3","LHAV3k4","LHAV3k5","LHAV3k6","LHAV3m1","LHAV3o1","LHAV3p1","LHAV3q1","LHAV4a1_b","LHAV4a2","LHAV4a4","LHAV4a6","LHAV4b1","LHAV4b2","LHAV4c1","LHAV4c2","LHAV4d1","LHAV4e1_a","LHAV4e4","LHAV4g17","LHAV4g1a","LHAV4g1b","LHAV4g1c","LHAV4i1","LHAV4i2","LHAV4j1","LHAV4l1","LHAV5a1","LHAV5a10_b","LHAV5a2_a1","LHAV5a2_a2","LHAV5a2_a3","LHAV5a2_a4","LHAV5a2_b","LHAV5a2_d","LHAV5d1","LHAV5e1","LHAV6a1","LHAV6a3","LHAV6b1","LHAV6b4","LHAV6c1a","LHAV6c1b","LHAV6e1","LHAV6g1","LHAV6h1","LHAV7a1a","LHAV7a1b","LHAV7a1c","LHAV7a2","LHAV7a3","LHAV7a4a","LHAV7a4b","LHAV7a5","LHAV7a6","LHAV7a7","LHAV7b1","LHAV8a1","LHAV9a1_a","LHAV9a1_b","LHAV9a1_c","LHCENT1","LHCENT10","LHCENT11","LHCENT12a","LHCENT12b","LHCENT13_a","LHCENT13_b","LHCENT13_c","LHCENT13_d","LHCENT14","LHCENT2","LHCENT3","LHCENT4","LHCENT5","LHCENT6","LHCENT8","LHCENT9","LHMB1","LHPD1b1","LHPD2a4_a,SIP049","LHPD2c1","LHPD2c7","LHPD2d1","LHPD2d2","LHPD3a2","LHPD3a5","LHPD3c1","LHPD4a1","LHPD4b1a","LHPD4b1b","LHPD4c1","LHPD4d1","LHPD5a1","LHPD5c1","LHPD5d1","LHPV10a1a","LHPV10a1b","LHPV10b1","LHPV10c1","LHPV10d1","LHPV11a1","LHPV12a1","LHPV1c1","LHPV1c2","LHPV1d1","LHPV2a1_a","LHPV2a1_c","LHPV2a1_d","LHPV2a4","LHPV2a5","LHPV2b5","LHPV2c2a","LHPV2c2b","LHPV2c4","LHPV2d1","LHPV2e1_a","LHPV2f2","LHPV2g1","LHPV2h1","LHPV2i1a","LHPV2i1b","LHPV2i2a","LHPV2i2b","LHPV3a1","LHPV3a2","LHPV3a3_c","LHPV3b1_b","LHPV3c1","LHPV4a1","LHPV4a1,LHPV4a2","LHPV4a10","LHPV4a11","LHPV4a2","LHPV4a5, LHPV4k1","LHPV4a7a","LHPV4a7b","LHPV4a8","LHPV4a9","LHPV4b1","LHPV4b2","LHPV4b3","LHPV4b9","LHPV4c3, LHPV4c4","LHPV4c4","LHPV4d3","LHPV4e1","LHPV4g1","LHPV4h1","LHPV4h3","LHPV4i3","LHPV4j3","LHPV4j4","LHPV4l1","LHPV4m1","LHPV5a1","LHPV5a5","LHPV5b1","LHPV5b2","LHPV5b3","LHPV5b4","LHPV5b6","LHPV5c1","LHPV5c2","LHPV5c3","LHPV5d1","LHPV5e1","LHPV5e2","LHPV5e3","LHPV5g1_a,SMP270","LHPV5g1_b","LHPV5g2","LHPV5i1","LHPV5l1","LHPV6a1","LHPV6a10","LHPV6a3","LHPV6c1","LHPV6c2","LHPV6d1","LHPV6f1","LHPV6g1","LHPV6h1","LHPV6h2","LHPV6h3,SLP276","LHPV6j1","LHPV6k1","LHPV6k2","LHPV6l1","LHPV6l2","LHPV6m1","LHPV6o1","LHPV6p1","LHPV6q1","LHPV6r1","LHPV7a1a","LHPV7a1b","LHPV7a2","LHPV7b1","LHPV7c1","LHPV8a1","LHPV8c1","LHPV9b1","LLPC1","LLPC2","LLPC3","LLPC4","LLPt","LM102a_L234-M89","LMTe01","LMa1","LMa2","LMa3","LMa4","LMa5","LMt1","LMt2","LMt3","LMt4","LN-DN1","LN-DN2","LN60a","LN60b","LNO1","LNO2","LNOa","LNd_a","LNd_b","LNd_c","LPC1","LPC2","LPLC1","LPLC2","LPLC4","LPT04_HST","LPT21","LPT22","LPT23","LPT26","LPT27","LPT28","LPT29","LPT30","LPT31","LPT42_Nod4","LPT45_dCal1","LPT47_vCal2","LPT48_vCal3","LPT49","LPT50","LPT51","LPT52","LPT53","LPT54","LPT57","LPT58","LPTe01","LPTe02","LPi01","LPi02","LPi03","LPi04","LPi05","LPi06","LPi07","LPi08","LPi09","LPi10","LPi11","LPi12","LPi13","LPi14","LPi15","LPsP","LT11","LT1a","LT1b","LT1c","LT1d","LT33","LT34","LT36","LT37","LT38","LT39","LT40","LT41","LT42","LT43","LT47","LT51","LT52","LT53,PLP098","LT54","LT55","LT56","LT57","LT58","LT59","LT60","LT61a","LT61b","LT62","LT63","LT64","LT65","LT66","LT67","LT68","LT69","LT70","LT72","LT73","LT74","LT75","LT76","LT77","LT78","LT79","LT80","LT81","LT82a","LT82b","LT83","LT84","LT85","LT86","LT87","LTe01","LTe02","LTe03","LTe04","LTe05","LTe06","LTe07","LTe08","LTe09","LTe10","LTe11","LTe12","LTe13","LTe14","LTe15","LTe16","LTe17","LTe18","LTe19","LTe20","LTe21","LTe22","LTe23","LTe24","LTe25","LTe26","LTe27","LTe28","LTe29","LTe30","LTe31","LTe32","LTe33","LTe35","LTe36","LTe37","LTe38a","LTe38b","LTe40","LTe41","LTe42a","LTe42b","LTe42c","LTe43a","LTe43b","LTe44","LTe45","LTe46","LTe47","LTe48","LTe49","LTe50","LTe51","LTe53","LTe54","LTe55","LTe56","LTe57","LTe58","LTe59a","LTe59b","LTe60","LTe62","LTe63","LTe64","LTe65","LTe66","LTe67","LTe68a","LTe68b","LTe69","LTe70","LTe71","LTe72","LTe73","LTe74","LTe75","LTe76","Lai","Lat1","Lat2","Lat5","Lawf1","Lawf2","LgAG1","LgAG2","LgAG3","LgAG4","LgAG5","LgAG6","LgAG7","LgAG8","LgAG9","Li01","Li02","Li03","Li04","Li05","Li06","Li07","Li08","Li09","Li10","Li11","Li12","Li124_56","Li13","Li14","Li15","Li16","Li17","Li18","Li19","Li20","Li21","Li22","Li23","Li24","Li25","Li26","Li27","Li28","Li29","Li30","Li31","Li32","Li33","MB-C1","MBON01","MBON02","MBON03","MBON04","MBON05","MBON06","MBON07","MBON09","MBON10","MBON11","MBON12","MBON13","MBON14","MBON15","MBON15-like","MBON16","MBON17","MBON17-like","MBON18","MBON19","MBON20","MBON21","MBON22","MBON23","MBON24","MBON25,MBON34","MBON26","MBON27","MBON28","MBON29","MBON30","MBON31","MBON32","MBON33","MBON35","MC65","MDN","MLt1","MLt2","MLt3","MLt4","MLt5","MLt6","MLt7","MLt8","MN10","MNx01","MNx03","MTe01a","MTe01b","MTe01c","MTe02","MTe03","MTe04","MTe05","MTe06","MTe07","MTe08","MTe09","MTe10","MTe11","MTe12","MTe13","MTe14","MTe15","MTe16","MTe17a","MTe17b","MTe18","MTe19","MTe20","MTe21","MTe22","MTe23","MTe24","MTe25","MTe26","MTe27","MTe28","MTe29","MTe30","MTe31","MTe32","MTe33","MTe34","MTe35","MTe36","MTe37","MTe38","MTe39","MTe40","MTe41","MTe42","MTe43","MTe44","MTe45","MTe46","MTe47","MTe48","MTe49","MTe50","MTe51","MTe52","MTe53","MTe54","MZ_lv2PN","M_VPNml66","M_adPNm3","M_adPNm4","M_adPNm5","M_adPNm6","M_adPNm7","M_adPNm8","M_ilPNm90,M_ilPN8t91","M_imPNl92","M_l2PN10t19a","M_l2PN10t19b","M_l2PN3t18","M_l2PNl20","M_l2PNl21","M_l2PNl22","M_l2PNl23","M_l2PNm14","M_l2PNm15","M_l2PNm16","M_l2PNm17","M_lPNm11A","M_lPNm11B","M_lPNm11C","M_lPNm11D","M_lv2PN9t49a","M_lv2PN9t49b","M_lvPNm24","M_lvPNm25","M_lvPNm26","M_lvPNm27","M_lvPNm28","M_lvPNm29","M_lvPNm31","M_lvPNm35","M_lvPNm37","M_lvPNm39","M_lvPNm40","M_lvPNm41","M_lvPNm42","M_lvPNm43","M_lvPNm44","M_lvPNm45","M_lvPNm46","M_lvPNm47","M_lvPNm48","M_smPN6t2","M_smPNm1","M_spPN4t9","M_spPN5t10","M_vPNml50","M_vPNml51","M_vPNml52","M_vPNml53","M_vPNml54","M_vPNml55","M_vPNml57","M_vPNml60","M_vPNml63","M_vPNml64","M_vPNml65","M_vPNml67","M_vPNml69","M_vPNml72","M_vPNml75","M_vPNml77","M_vPNml79","M_vPNml80","M_vPNml83","M_vPNml84","M_vPNml86","M_vPNml87","MeLp1","MeLp2","MeMe_e01","MeMe_e02","MeMe_e03","MeMe_e04","MeMe_e05","MeMe_e06","MeMe_e07","MeMe_e08","MeMe_e09","MeMe_e10","MeMe_e11","MeMe_e12","MeMe_e13","MeTu1","MeTu2a","MeTu2b","MeTu3a","MeTu3b","MeTu3c","MeTu4a","MeTu4b","MeTu4c","MeTu4d","Mi1","Mi10","Mi13","Mi14","Mi15","Mi2","Mi4","Mi9","MsAHN","MtAHN","NPFL1-I","Nod1","Nod2","Nod3","Nod5","OA-AL2b1","OA-AL2b2","OA-AL2i1","OA-AL2i2","OA-AL2i3","OA-AL2i4","OA-ASM1","OA-ASM2","OA-ASM3","OA-VPM3","OA-VPM4","OA-VUMa1","OA-VUMa2","OA-VUMa3","OA-VUMa4","OA-VUMa5","OA-VUMa6","OA-VUMa8","OCC01a","OCC01b","OCC02a","OCC02b","OCG01a","OCG01b","OCG01c","OCG01d","OCG01e","OCG01f","OCG02a","OCG02b","OCG02c","OLVC7","ORN_D","ORN_DA1","ORN_DA2","ORN_DA3","ORN_DA4l","ORN_DA4m","ORN_DC1","ORN_DC2","ORN_DC3","ORN_DC4","ORN_DL1","ORN_DL2d","ORN_DL2v","ORN_DL3","ORN_DL4","ORN_DL5","ORN_DM1","ORN_DM2","ORN_DM3","ORN_DM4","ORN_DM5","ORN_DM6","ORN_DP1l","ORN_DP1m","ORN_V","ORN_VA1d","ORN_VA1v","ORN_VA2","ORN_VA3","ORN_VA4","ORN_VA5","ORN_VA6","ORN_VA7l","ORN_VA7m","ORN_VC1","ORN_VC2","ORN_VC3","ORN_VC4","ORN_VC5","ORN_VL1","ORN_VL2a","ORN_VL2p","ORN_VM1","ORN_VM2","ORN_VM3","ORN_VM4","ORN_VM5d","ORN_VM5v","ORN_VM6l","ORN_VM6m","ORN_VM6v","ORN_VM7d","ORN_VM7v","P6-8P9","PAL01","PAL02","PAL03","PAM01","PAM02","PAM03","PAM04","PAM05","PAM06","PAM07","PAM08","PAM09","PAM10","PAM11","PAM12","PAM13","PAM14","PAM15","PDt1","PEG","PEN_a(PEN1)","PEN_b(PEN2)","PFGs","PFL1","PFL2","PFL3","PFNa","PFNd","PFNm","PFNp","PFNv","PFR","PFR_a","PLP001","PLP003","PLP004","PLP005","PLP006","PLP007","PLP008","PLP009","PLP010","PLP012","PLP013","PLP015","PLP016","PLP017","PLP018","PLP019","PLP020","PLP021","PLP022","PLP023","PLP024","PLP025a","PLP025b","PLP026,PLP027","PLP028","PLP029","PLP032","PLP034","PLP035","PLP036","PLP037a","PLP037b","PLP038","PLP039","PLP041,PLP043","PLP042a","PLP042b","PLP042c","PLP044","PLP046a","PLP046b","PLP046c","PLP048","PLP051","PLP052","PLP053a","PLP053b","PLP054","PLP055","PLP057a","PLP057b","PLP058","PLP059a","PLP059b","PLP060","PLP064_a","PLP064_b","PLP065a","PLP065b","PLP067a","PLP067b","PLP068","PLP069","PLP071","PLP073","PLP075","PLP078","PLP079","PLP081","PLP084,PLP085","PLP086a","PLP086b","PLP087a","PLP087b","PLP089b","PLP092","PLP093","PLP094","PLP095","PLP096","PLP097","PLP099","PLP100","PLP101,PLP102","PLP103a","PLP103b","PLP103c","PLP104","PLP106","PLP108","PLP109,PLP112","PLP113","PLP114","PLP115_a","PLP115_b","PLP116","PLP119","PLP120,PLP145","PLP121","PLP122","PLP123","PLP124","PLP128","PLP129","PLP130","PLP131","PLP132","PLP139,PLP140","PLP141","PLP142","PLP143","PLP144","PLP148","PLP149","PLP150a","PLP150b","PLP150c","PLP154","PLP155","PLP156","PLP157","PLP158","PLP159","PLP160","PLP161","PLP162","PLP163","PLP164","PLP165","PLP169","PLP170","PLP171","PLP172","PLP173","PLP174","PLP175","PLP177","PLP178","PLP180","PLP181","PLP182","PLP184","PLP185,PLP186","PLP187","PLP188,PLP189","PLP190","PLP191","PLP192","PLP196","PLP197","PLP198,SLP361","PLP199","PLP208","PLP209","PLP211","PLP213","PLP214","PLP215","PLP216","PLP217","PLP218","PLP221","PLP222","PLP223","PLP228","PLP229","PLP230","PLP231","PLP232","PLP234","PLP237","PLP239","PLP241","PLP243","PLP245","PLP246","PLP247","PLP248","PLP249","PLP250","PLP251","PLP252","PLP254","PPL101","PPL102","PPL103","PPL104","PPL105","PPL106","PPL107","PPL108","PPL201","PPL202","PPL203","PPL204","PPM1201","PPM1202","PPM1203","PPM1204,PS139","PPM1205","PS001","PS002","PS003,PS006","PS004a","PS004b","PS005","PS005_a","PS005_f","PS007","PS008","PS010","PS011","PS013","PS018a","PS018b","PS019","PS020","PS021","PS022","PS023","PS024","PS025","PS026","PS027","PS029","PS030","PS031","PS034","PS037","PS038a","PS038b","PS041","PS043,PS044","PS046","PS047a","PS047b","PS048a","PS048b","PS049","PS050","PS051","PS052","PS053","PS054","PS055","PS057","PS058","PS059","PS061","PS062","PS063","PS065","PS068","PS074","PS076","PS078","PS080","PS081,PS085","PS082","PS083a","PS083b","PS084","PS086","PS087","PS088","PS089","PS090a","PS090b","PS091","PS092","PS093","PS094a","PS094b","PS095","PS096","PS097","PS098","PS099a","PS099b","PS100","PS106","PS107","PS108","PS109","PS112","PS114","PS115","PS116","PS117a","PS117b","PS118","PS124","PS126","PS127","PS137","PS138","PS140","PS141,PS147","PS143,PS149","PS146","PS150","PS150a","PS150b","PS153","PS156","PS157","PS158","PS159","PS160","PS161","PS164,PS165","PS170","PS171","PS172","PS173","PS174","PS175","PS176","PS177","PS178","PS180","PS181","PS182","PS183","PS184,PS272","PS185a","PS185b","PS186","PS187","PS188a","PS188b","PS188c","PS191a","PS191b","PS192","PS193a","PS193b","PS193c","PS194","PS196a","PS196b","PS197,PS198","PS199","PS200","PS202","PS203a","PS203b","PS208a","PS208b","PS209","PS210","PS213","PS214","PS215","PS217","PS220","PS221","PS224","PS230,PLP242","PS231","PS232","PS233","PS234","PS235,PS261","PS237","PS238","PS239","PS240,PS264","PS241a","PS241b","PS242","PS247","PS248","PS249","PS251","PS252","PS253","PS260","PS262","PS263","PS265","PS267","PS268","PS269","PS274","PS276","PS279","PS280","PS289","PS291","PS292","PS300","PS303","PV7c11","PVLP001","PVLP002","PVLP003","PVLP004,PVLP005","PVLP006","PVLP007","PVLP008","PVLP009","PVLP010","PVLP011","PVLP012","PVLP013","PVLP014","PVLP015","PVLP016","PVLP017","PVLP018","PVLP019","PVLP020","PVLP021","PVLP022","PVLP024","PVLP025","PVLP026","PVLP027","PVLP028","PVLP030","PVLP033","PVLP036","PVLP037","PVLP049","PVLP060","PVLP061","PVLP062","PVLP065","PVLP069","PVLP070","PVLP074","PVLP076","PVLP080a","PVLP080b","PVLP081","PVLP082a","PVLP082b","PVLP084","PVLP086","PVLP086,PVLP087","PVLP088","PVLP089","PVLP090","PVLP092","PVLP093","PVLP094","PVLP097","PVLP099","PVLP100","PVLP101a","PVLP101b","PVLP101c","PVLP102","PVLP103","PVLP104","PVLP105","PVLP106","PVLP107","PVLP108","PVLP109","PVLP111","PVLP112a","PVLP112b","PVLP113","PVLP114","PVLP115","PVLP118","PVLP120","PVLP121","PVLP122a","PVLP122b","PVLP123a","PVLP123b","PVLP123c","PVLP124","PVLP128","PVLP130","PVLP133","PVLP134","PVLP135","PVLP137","PVLP138","PVLP139","PVLP140","PVLP141","PVLP143","PVLP144","PVLP148","PVLP149","PVLP150","PVLP151","PhG10","PhG11","PhG12","PhG13","PhG14","PhG15","PhG16","PhG1a","PhG1b","PhG1c","PhG2","PhG3","PhG4","PhG5","PhG6","PhG7","PhG8","PhG9","Pm01","Pm02","Pm03","Pm04","Pm05","Pm06","Pm07","Pm08","Pm09","Pm10","Pm11","Pm12","Pm13","Pm14","R1-6","R7","R8","SA1","SA2","SA3","SAD003","SAD005,SAD006","SAD007","SAD008","SAD009","SAD010","SAD011,SAD019","SAD012","SAD013","SAD014","SAD017","SAD021_a","SAD021_c","SAD023","SAD030","SAD034","SAD035","SAD036","SAD040","SAD043","SAD044","SAD045,SAD046","SAD047","SAD049","SAD052","SAD053","SAD064","SAD070","SAD072","SAD074","SAD075","SAD076","SAD077","SAD080","SAD082","SAD084","SAD085","SAD093","SAD094","SAD301f","SAF","SA_DLV","SA_DMT_ADMN_1","SA_DMT_ADMN_10","SA_DMT_ADMN_11","SA_DMT_ADMN_2","SA_DMT_ADMN_3","SA_DMT_ADMN_4","SA_DMT_ADMN_5","SA_DMT_ADMN_6","SA_DMT_ADMN_7","SA_DMT_ADMN_8","SA_DMT_ADMN_9","SA_DMT_DMetaN_1","SA_DMT_DMetaN_10","SA_DMT_DMetaN_11","SA_DMT_DMetaN_12","SA_DMT_DMetaN_2","SA_DMT_DMetaN_3","SA_DMT_DMetaN_4","SA_DMT_DMetaN_5","SA_DMT_DMetaN_6","SA_DMT_DMetaN_7","SA_DMT_DMetaN_8","SA_DMT_DMetaN_9","SA_MDA_1","SA_MDA_2","SA_MDA_3","SA_MDA_4","SA_VTV_6","SA_VTV_DProN_1","SA_VTV_PDMN_1","SIP003_a","SIP003_b","SIP005","SIP006","SIP013a","SIP013b","SIP014,SIP016","SIP015","SIP017","SIP018","SIP019","SIP020","SIP022","SIP024","SIP025","SIP027","SIP028","SIP028a","SIP028b","SIP029","SIP031","SIP032,SIP059","SIP033","SIP034","SIP041","SIP045","SIP046","SIP047a","SIP047b","SIP048","SIP052","SIP053a","SIP053b","SIP055,SLP245","SIP057","SIP061","SIP064","SIP065","SIP066","SIP067","SIP069","SIP073","SIP076","SIP078,SIP080","SIP081","SIP086","SIP087","SIP088","SIP089","SIP090","SIP200f","SIP201f","SLP001","SLP003","SLP004","SLP005","SLP006","SLP007a","SLP007b","SLP008","SLP011","SLP012","SLP012b","SLP016","SLP017","SLP019","SLP024a","SLP024b","SLP024c","SLP024d","SLP025a","SLP025b","SLP026","SLP027","SLP028a","SLP028b","SLP028c","SLP030","SLP031","SLP032","SLP033","SLP034","SLP035","SLP036","SLP041","SLP044_d","SLP047","SLP048","SLP056","SLP057","SLP059","SLP060","SLP061","SLP062","SLP064","SLP065","SLP066","SLP067","SLP068","SLP069","SLP070","SLP071","SLP072","SLP073","SLP074","SLP075","SLP076","SLP077","SLP079","SLP080","SLP082","SLP083","SLP088,SLP095","SLP098,SLP133","SLP101","SLP102","SLP103","SLP104,SLP205","SLP106","SLP109,SLP143","SLP114,SLP115","SLP118","SLP119","SLP120","SLP122","SLP126","SLP128","SLP129_c","SLP130","SLP131","SLP132","SLP134","SLP136","SLP137","SLP141,SLP142","SLP149","SLP150","SLP151","SLP152","SLP153","SLP155","SLP157","SLP158","SLP160","SLP162a","SLP162b","SLP162c","SLP170","SLP184","SLP188","SLP189","SLP202","SLP204","SLP206","SLP207","SLP208","SLP209","SLP210","SLP211","SLP212a","SLP212b","SLP212c","SLP213","SLP214","SLP215","SLP216","SLP221","SLP222","SLP223","SLP224","SLP226","SLP227","SLP228","SLP230","SLP231","SLP234","SLP235","SLP236","SLP237","SLP238","SLP239","SLP240_a","SLP240_b","SLP241","SLP242","SLP244","SLP246","SLP247","SLP248","SLP255","SLP256","SLP257","SLP258","SLP261,SLP262","SLP265a","SLP265b","SLP269","SLP270","SLP273","SLP274","SLP275","SLP278","SLP279","SLP281","SLP285","SLP286","SLP287","SLP288a","SLP288b","SLP288c","SLP289","SLP290","SLP291","SLP295a","SLP295b","SLP298","SLP300a","SLP300b","SLP302a","SLP302b","SLP304a","SLP304b","SLP305","SLP307","SLP308a","SLP308b","SLP312","SLP313","SLP314","SLP317,SLP318","SLP319","SLP321","SLP327","SLP340","SLP344","SLP345","SLP345b","SLP355","SLP356a","SLP356b","SLP358","SLP359","SLP363","SLP364","SLP365","SLP366","SLP368","SLP369,SLP370","SLP373","SLP374","SLP375","SLP376","SLP377","SLP378","SLP379","SLP380","SLP381","SLP382","SLP383","SLP384","SLP385","SLP386","SLP387","SLP388","SLP389","SLP390","SLP391","SLP392","SLP393","SLP395","SLP396","SLP397","SLP398a","SLP398b","SLP400a","SLP400b","SLP402_a","SLP402_b","SLP403","SLP404","SLP405","SLP406","SLP411","SLP412_a","SLP412_b","SLP421","SLP433","SLP435","SLP437","SLP438","SLP443","SLP444","SLP447","SLP450","SLP451a","SLP451b","SLP455","SLP456","SLP457","SLP458","SLP459","SLP462","SLP463","SLP464","SLP465a","SLP465b","SLP467a","SLP467b","SLPpm3_H01","SLPpm3_H02","SLPpm3_P01","SLPpm3_P02","SLPpm3_P03","SLPpm3_P04","SLPpm3_S01","SMP001","SMP003,SMP005","SMP006","SMP008","SMP010","SMP011a","SMP011b","SMP012","SMP014","SMP015","SMP016_a","SMP016_b","SMP017","SMP018","SMP019","SMP020","SMP021","SMP022a","SMP022b","SMP025a","SMP025b","SMP025c","SMP026","SMP027","SMP028","SMP029","SMP030","SMP031","SMP033","SMP034","SMP035","SMP036","SMP037","SMP038","SMP039","SMP040","SMP041","SMP042","SMP043","SMP044","SMP045","SMP046","SMP047","SMP048","SMP049,SMP076","SMP050","SMP051","SMP054","SMP055","SMP056","SMP057","SMP058","SMP059","SMP060,SMP374","SMP061,SMP062","SMP063,SMP064","SMP065","SMP066","SMP067","SMP068","SMP069","SMP074,CL040","SMP075a","SMP075b","SMP077","SMP079","SMP080","SMP081","SMP083","SMP084","SMP085","SMP087","SMP089","SMP090","SMP091","SMP092","SMP093","SMP095","SMP096","SMP098_a","SMP102","SMP103","SMP105_a","SMP105_b","SMP106","SMP107","SMP108","SMP109","SMP111","SMP112","SMP114","SMP115","SMP116","SMP119","SMP120a","SMP120b","SMP121","SMP122","SMP123a","SMP123b","SMP124","SMP128","SMP138","SMP142,SMP145","SMP143,SMP149","SMP144,SMP150","SMP146","SMP147","SMP151","SMP152","SMP153a","SMP153b","SMP154","SMP155","SMP156","SMP157","SMP158","SMP159","SMP160","SMP161","SMP162a","SMP162b","SMP162c","SMP163","SMP164","SMP165","SMP166","SMP167","SMP168","SMP169","SMP170","SMP171","SMP172","SMP173","SMP174","SMP175","SMP176","SMP177","SMP178","SMP179","SMP180","SMP181","SMP182","SMP183","SMP184","SMP185","SMP186","SMP187","SMP188","SMP189","SMP190","SMP191","SMP192","SMP193a","SMP193b","SMP194","SMP198","SMP199","SMP200","SMP201","SMP202","SMP203","SMP204","SMP206","SMP207","SMP208","SMP210","SMP213,SMP214","SMP215a","SMP215b","SMP215c","SMP217","SMP229","SMP234","SMP235","SMP237","SMP238","SMP239","SMP240","SMP245","SMP246","SMP248a","SMP248b","SMP248c","SMP249","SMP250","SMP251","SMP252","SMP253","SMP254","SMP255","SMP256","SMP257","SMP258","SMP261","SMP262","SMP266","SMP269","SMP271","SMP272","SMP273","SMP276","SMP277","SMP278a","SMP278b","SMP279_b","SMP279_c","SMP280","SMP281","SMP282","SMP283","SMP284a","SMP284b","SMP285","SMP286","SMP291","SMP292,SMP293,SMP584","SMP298","SMP307","SMP311","SMP312","SMP313","SMP314a","SMP314b","SMP315","SMP317a","SMP317b","SMP317c","SMP318","SMP319","SMP320a","SMP320b","SMP321_b","SMP323","SMP326a","SMP326b","SMP328a","SMP328b","SMP329","SMP330a","SMP330b","SMP331a","SMP331b","SMP331c","SMP332a","SMP332b","SMP333","SMP334","SMP335","SMP337","SMP338,SMP534","SMP339","SMP340","SMP341","SMP342","SMP344a","SMP344b","SMP345","SMP346","SMP348a","SMP348b","SMP353","SMP356","SMP357","SMP359","SMP360","SMP361a","SMP361b","SMP362","SMP368","SMP369","SMP370","SMP371","SMP372","SMP373","SMP375","SMP376","SMP379","SMP381","SMP383","SMP384","SMP385","SMP386","SMP387","SMP388","SMP389a","SMP389b","SMP389c","SMP390","SMP392","SMP393a","SMP393b","SMP397","SMP398","SMP399a","SMP399b","SMP404a","SMP404b","SMP405","SMP406","SMP407","SMP408_a","SMP408_b","SMP408_c","SMP408_d","SMP409","SMP410","SMP411a","SMP411b","SMP413","SMP416,SMP417","SMP418","SMP419","SMP420","SMP421","SMP422","SMP423","SMP424","SMP425","SMP426","SMP427","SMP428","SMP429","SMP441","SMP442","SMP444","SMP445","SMP446a","SMP446b","SMP447","SMP448","SMP450","SMP451a","SMP451b","SMP452","SMP453","SMP455","SMP456","SMP457","SMP458","SMP459","SMP460","SMP461","SMP469a","SMP469b","SMP469c","SMP470","SMP471","SMP472,SMP473","SMP476","SMP477","SMP482","SMP490","SMP492","SMP493","SMP494","SMP495a","SMP495b","SMP495c","SMP496","SMP501,SMP502","SMP503","SMP504","SMP505","SMP506","SMP507","SMP509a","SMP509b","SMP510a","SMP510b","SMP511","SMP512","SMP513","SMP514","SMP515","SMP516a","SMP516b","SMP517","SMP518","SMP519","SMP520a","SMP520b","SMP521","SMP522","SMP523,SMP524","SMP525","SMP526","SMP527","SMP528","SMP529","SMP530","SMP531","SMP532a","SMP532b","SMP533","SMP535","SMP537","SMP538,SMP599","SMP539","SMP540","SMP541","SMP542","SMP543","SMP544,LAL134","SMP545","SMP546,SMP547","SMP549","SMP550","SMP552","SMP553","SMP554","SMP555,SMP556","SMP558","SMP561","SMP562","SMP565","SMP566a","SMP566b","SMP567","SMP568","SMP569a","SMP569b","SMP570a","SMP570b","SMP571","SMP572","SMP573","SMP577","SMP578","SMP579,SMP583","SMP580","SMP582","SMP586","SMP588","SMP589","SMP590","SMP591","SMP592","SMP593","SMP594","SMP595","SMP596","SMP597","SMP598","SMP600","SMP602,SMP094","SMP603","SMP604","SMP746","SMPp&v1A_H01","SMPp&v1A_P03","SMPp&v1A_S02","SMPp&v1A_S03","SMPp&v1B_H01","SMPp&v1B_M01","SMPp&v1B_M02","SPS100f","SPm101_78-78","Sm01","Sm02","Sm03","Sm04","Sm05","Sm06","Sm07","Sm08","Sm09","Sm10","Sm11","Sm12","Sm13","Sm14","Sm15","Sm16","Sm17","Sm18","Sm19","Sm20","Sm21","Sm22","Sm23","Sm24","Sm25","Sm26","Sm27","Sm28","Sm29","Sm30","Sm31","Sm32","Sm33","Sm34","Sm35","Sm36","Sm37","Sm38","Sm39","Sm40","Sm41","Sm42","Sm43","SpsP","T1","T2","T2a","T3","T4a","T4b","T4c","T4d","T5a","T5b","T5c","T5d","TPMN1","TPMN2","TRN_VP1m","TRN_VP2","TRN_VP3a","TRN_VP3b","Tlp1","Tlp14","Tlp4","Tlp5","Tm1","Tm12","Tm16","Tm2","Tm20","Tm21","Tm25","Tm27","Tm3","Tm31","Tm32","Tm33","Tm34","Tm35","Tm36","Tm37","Tm4","Tm40","Tm5a","Tm5b","Tm5c","Tm5d","Tm5e","Tm5f","Tm6","Tm7","Tm8a","Tm8b","Tm9","TmY10","TmY11","TmY14","TmY15","TmY16","TmY18","TmY20","TmY3","TmY31","TmY4","TmY5a","TmY9","TmY9q","TmY9q__perp","TuBu01a","TuBu01b","TuBu02","TuBu03","TuBu04","TuBu05","TuBu06a","TuBu06b","TuBu07","TuBu08","TuBu09,TuBu10","TuTuAa","TuTuAb","TuTuB_a","TuTuB_b","VA1d_adPN","VA1d_vPN","VA1v_adPN","VA1v_vPN","VA2_adPN","VA3_adPN","VA4_lPN","VA5_lPN","VA6_adPN","VA7l_adPN","VA7m_lPN","VC1_lPN","VC2_lPN","VC3_adPN","VC4_adPN","VC5_lvPN","VCH","VES001","VES002","VES003","VES004","VES005","VES007","VES010","VES011","VES012","VES013","VES014","VES016","VES017","VES018","VES019","VES020","VES021","VES022a","VES022b","VES023","VES024a","VES024b","VES025","VES027","VES030","VES039","VES040","VES041","VES043","VES045","VES046","VES047","VES048","VES049","VES050","VES051,VES052","VES053","VES054","VES056","VES057","VES058","VES059","VES060","VES063a","VES063b","VES064","VES065","VES066","VES067","VES070","VES071","VES072","VES073","VES074","VES075","VES076","VES077","VES078","VES079","VESa1_P02","VESa2_H02","VESa2_H04","VESa2_P01","VL1_ilPN","VL1_vPN","VL2a_adPN","VL2a_vPN","VL2p_adPN","VL2p_vPN","VM1_lPN","VM2_adPN","VM3_adPN","VM4_adPN","VM4_lvPN","VM5d_adPN","VM5v_adPN","VM6_adPN","VM7d_adPN","VM7v_adPN","VP1d+VP4_l2PN1","VP1d+VP4_l2PN2","VP1d_il2PN","VP1l+VP3_ilPN","VP1l+_lvPN","VP1m+VP2_lvPN1","VP1m+VP5_ilPN","VP1m+_lvPN","VP1m_l2PN","VP2+VC5_l2PN","VP2+_adPN","VP2_adPN","VP2_l2PN","VP3+VP1l_ivPN","VP3+_l2PN","VP3+_vPN","VP4+VL1_l2PN","VP4+_vPN","VP4_vPN","VP5+VP3_l2PN","VP5+Z_adPN","VP5+_l2PN,VP5+VP2_l2PN","VS1","VS2","VS3","VS4","VS5","VS6","VS7","VS8","VST1","VST2","VSm","V_ilPN","V_l2PN","WED002a","WED002b","WED002c","WED002d","WED002e","WED004","WED006","WED007","WED008","WED010","WED011","WED012","WED013","WED014","WED015","WED016","WED017","WED018","WED020_b","WED023","WED024","WED025","WED026","WED028","WED029","WED031","WED032","WED033","WED034,WED035","WED037","WED038a","WED038b","WED039","WED040","WED041a","WED041b","WED044","WED045","WED046","WED051","WED056","WED057","WED060","WED061","WED069","WED070","WED071","WED072","WED075","WED076","WED080","WED081","WED082","WED085","WED089","WED091","WED092b","WED092c","WED092d","WED092e","WED094a","WED094b","WED094c","WED095","WED096a","WED096b","WED096c","WED097","WED098","WED099","WED100","WED101","WED102","WED103","WED104","WED107","WED108","WED114","WED116","WED119","WED120","WED121","WED122","WED124","WED125","WED127","WED128,WED129","WED130","WED144","WED145","WED146a","WED146b","WED151","WED152","WED153","WED155a","WED155b","WED161","WED162","WED163a","WED163b","WED163c","WED164a","WED164b","WED165","WED166_d","WED168","WED174","WED181","WED182","WED26b","WEDPN10A","WEDPN10B","WEDPN11","WEDPN12","WEDPN14","WEDPN1A","WEDPN1B","WEDPN2A","WEDPN2B","WEDPN3","WEDPN4","WEDPN5","WEDPN6A","WEDPN6B, WEDPN6C","WEDPN7B","WEDPN7C","WEDPN8B","WEDPN8D","WEDPN9","Y1","Y11","Y12","Y3","Y4","Z_vPNml1","aMe1","aMe10","aMe12","aMe13","aMe15","aMe17a1","aMe17a2","aMe17b","aMe17c","aMe19a","aMe19b","aMe20","aMe22","aMe24","aMe25","aMe26","aMe3","aMe4","aMe5","aMe6a","aMe6b","aMe6c","aMe8","aMe9","aPhM1","aPhM2a","aPhM2b","aPhM3","aPhM4","aPhM5","aPhM6","aSP-f1A,aSP-f1B,aSP-f2","aSP-f3","aSP-f4","aSP-g1","aSP-g2","aSP-g3A","aSP-g3B","aSP22","cL01","cL02a","cL02b","cL02c","cL02d","cL03","cL04","cL05","cL06","cL07","cL08","cL09","cL10","cL11","cL12","cL13","cL14","cL15","cL16","cL17","cL18","cL19","cL20","cL21","cL22a","cL22b","cL22c","cLLP02","cLLPM01","cLLPM02","cLM01","cLP01a","cLP01b","cLP02","cLP03a","cLP03b","cLP03c","cLP04","cLP05","cLPL01","cM01a","cM01b","cM01c","cM02a","cM02b","cM03","cM04","cM05","cM06","cM07","cM08a","cM08b","cM08c","cM08d","cM09","cM10","cM11","cM12","cM13","cM14","cM15","cM16","cM17","cM18","cM19","cML01","cML02","cMLLP01","cMLLP02","claw_tpGRN","dorsal_tpGRN","hDeltaA","hDeltaB","hDeltaC","hDeltaD","hDeltaE","hDeltaF","hDeltaG","hDeltaH","hDeltaI","hDeltaJ","hDeltaK","hDeltaL","hDeltaM","il3LN6","l-LNv","l2LN19","l2LN20","l2LN21","l2LN22","l2LN23","lLN10","lLN13","lLN1_a","lLN1_bc","lLN2F_a","lLN2F_b","lLN2P_a","lLN2P_b","lLN2P_c","lLN2T_b","lLN2T_c","lLN2T_d","lLN2T_e","lLN2X02","lLN2X03","lLN2X04","lLN2X05","lLN2X06","lLN2X07","lLN2X09","lLN2X10","lLN2X11","lLN2X12","lLN8","lLN9","lLN9,lLN17a","lNSC_unknown","labial_nerve_sensory_descending","mAL4","mAL4B","mAL4I","mAL5A","mAL5B","mAL6","mALB1","mALB2","mALB3","mALB4","mALB5","mALC3","mALC4","mALC5","mALC6","mALD1","mALD2","mALD3","mALD4","mAL_f1","mAL_f2","mAL_f3","mAL_f4","mNSC_unknown","oviDNa_a","oviDNa_b","oviDNb","oviIN","pC1a","pC1b","pC1c","pC1d","pC1e","pDm8","s-LNv_a","s-LNv_b","uncertain","v2LN30","v2LN31","v2LN32","v2LN33","v2LN34E","v2LN36","v2LN37","v2LN38","v2LN39a","v2LN3A1_a","v2LN3A1_b","v2LN4","v2LN40_2","v2LN41a","v2LN41b","v2LN42a","v2LN42b","v2LN42c","v2LN46a","v2LN46b","v2LN47","v2LN49","v2LN5","v2LNX01","vCal1","vDeltaA_a","vDeltaA_b","vDeltaB","vDeltaC","vDeltaD","vDeltaE","vDeltaF","vDeltaG,vDeltaH","vDeltaI_a","vDeltaI_b","vDeltaJ","vDeltaK","vDeltaL","vDeltaM","vLN24","vLN25","vLN26","vLN27","vLN28,vLN29","vpoEN","yDm8"],"groups":[57,42,162,433,314,1098,383,61,16239,84236,32389,1736,1471,18],"gzBytes":35026279,"source":"FlyWire v783 (Dorkenwald et al. 2024; Schlegel et al. 2024) via Shiu et al. 2024 Drosophila_brain_model"};CONNECTOME.chunks=4;</script>
+<script>
+'use strict';
+/* =====================================================================
+   EULIA v5 — B_RR_K_ (garun osoa)
+   Benetako euli-garun zati bat (FlyWire v783, 5.573 neurona) pintzel gisa.
+   Eredua: Shiu et al. 2024ko LIF (0,275 mV sinapsiko, τm 20 ms, τs 5 ms).
+   Begiak oihala ikusten du → LC4/LPLC2, GRN, ORN, JO sentsoreak →
+   benetako konexioak → DNa02, DNp09 (P9), MDN, DNp01 (zuntz erraldoia),
+   MN9, aBN1 → pintzela mugitzen da.
+   ===================================================================== */
+
+// ---------- i18n ----------
+const I18N = {
+  eu:{sub:'Konektoma pintzel gisa · B_RR_K_',t_sugar:'Azukrea',t_bitter:'Mingotsa',t_shadow:'Itzala',t_place:'Kokatu',
+    play:'Martxan',pause:'Gelditu',clear:'Behaketa berria',confirm:'Ziur?',export:'PNG',overlay:'Eulia',params:'Parametroak',
+    speed:'Abiadura',brush:'Marra',photo:'Ikusmena',noise:'Zarata',palette:'Paleta',bg:'Hondoa',
+    smell:'Usaimena',smell_note:'esperimentala: lobulu antenala desboka daiteke',size:'Neurria',size_poster:'Kartela, bertikala',size_poster_h:'Kartela, horizontala',size_square:'Karratua',size_wide:'Leihoa 16:10',size_pano:'Panoramikoa 2:1',size_custom:'Neurri librea',apply:'Aplikatu',pal_obs:'Behaketa',pal_chem:'Kimika',pal_beh:'Jokabidea',pal_ink:'Tinta',bg_paper:'Papera',bg_black:'Beltza',seed:'Hazia',
+    newbrain:'Berria',eye:'Begia',eye_note:'2 × 61 omatidio',brain:'Garuna',behavior:'Jokabidea',chem:'Kimika',hz:'Hz',
+    b_walk:'Ibili',b_back:'Atzera',b_groom:'Garbitu',b_feed:'Jan',b_jump:'Hegan',b_fly:'Hegan',b_away:'Kanpoan',b_idle:'Geldi',
+    m_walk:'Ibili DNp09',m_turn:'Biratu DNa02',m_back:'Atzera MDN',m_groom:'Garbitu aBN1',m_feed:'Jan MN9',m_gf:'Ihes DNp01',m_load:'Pintura',m_sat:'Asetasuna',
+    raster_note:'Errenkada bakoitza ~440 neurona. Goitik behera: azukre eta mingots GRNak, ORNak, JO, LC4/LPLC2, objektu-detektoreak (LC10, LC9…), mugimendua (LPC1), LT tangentzialak, beste sentsoreak, lobulu optikoak (84.000), garun zentrala, deskendenteak, irteerak eta azkenik zubi sintetikoak.',
+    types_note:'Benetako zelula-mota aktiboenak orain (FlyWire izenak).',
+    hint:'Ez dago elkarrekintzarik: begiratu besterik ez. Eulia leiho-kristal batean dago; hegan egiten duenean marra eten egiten da. Zuriune: gelditu/jarraitu · H: eulia ezkutatu.',
+    src_h:'Nondik dator garun hau',
+    honest:'FlyWire v783 garun osoa: 138.639 neurona eta 15.091.983 konexio (54,5 milioi sinapsi), Shiu et al. 2024ko LIF ereduarekin, iragazkirik gabe. Sentsore hauek jasotzen dute sarrera: azukre eta mingots GRNak, ORN DM1/DM2/DM4, JO-C/E, LC4, LPLC2 eta objektu eta mugimendu detektoreak (LC10, LC9, LC11, LC31, LC33, LPC1, LLPC1, LT51, LT52); gainerako 136.000 neuronek garun osoan zehar hedatzen dute jarduera. Irteerak: DNa02, DNa01, DNp09, MDN, DNp01, MN9, aBN1. Sintetikoak dira oraindik: oinarrizko ibiltzeko gogoa, ausazko biraketak, usainera biratzea eta horma-ukipena (~110 neurona). Ez dago bizkarrezur-kordoirik (VNC): FlyWire garuna bakarrik da. Erretinaren kodeketa eredu sinplifikatua da. Usaimena lehenetsita itzalita dago: garun osoan, ORN bakar batek segundoko tiro bat eginda ere, lobulu antenala (PN eta LN) ~300 Hz-ean geratzen da usaina kendu ondoren ere, eta horrek DNa02 ezkerra etengabe aktibatzen du. Shiu ereduak ez du inhibizio motelik ez egokitzapenik; euli errealean horiek eusten diote. Itzaltzean garuna berrabiarazten da. Leihoa eta hegaldia: inguruneak (leiho-argia, noizbehinka pasatzen den itzala, antenetan pilatzen den hautsa) benetako sentsoreak (LC4/LPLC2, JO) elikatzen ditu, eta garunak erabakitzen du ihes egin edo garbitu. Hegaldia sintetikoa da: ihes-hegaldia zuntz erraldoiaren (DNp01) leherketa batek abiarazten du; borondatezko aireratzeak, hegaldiaren ibilbidea (zuzenak eta sakada bizkorrak) eta gorantz ibiltzeko joera (geotaxia negatiboa) eredu sinpleak dira. Geldialdien iraupenak behatzailearen erlojuan neurtzen dira (ordu erreala); euliak kamera geldoan bizi du (garun osoa ×0,3 inguru). Neurona errealei egokitzapen ahula gehitu zaie (τ 400 ms): hori gabe, begizta itxian minutu batzuen buruan lobulu antenala eta gorputz fungiformea ~300 Hz-ean blokeatzen ziren.',
+    cite:'Behaketa modua: Walter Marchettiren «Observación de los movimientos de una mosca…» (1967) lanari omenaldia. Datuak: FlyWire v783 (Dorkenwald et al. 2024; Schlegel et al. 2024, Nature). Eredua eta neurona-zerrendak: Shiu et al. 2024, Nature 634. Lizentzia CC BY.',
+    seed_note:'Haziak zubi sintetikoak eta LC-omatidio mapa soilik aldatzen ditu; benetako kableatua beti bera da. Ikusmena: erretinaren irabazia.',
+    neurons:'neurona',synapses:'konexio',save:'Gorde PNG',close:'Itxi',save_hint:'Deskargak ez badu funtzionatzen: eskuin-klik irudian → gorde.',fps:'fps',real:'erreal',synth:'sint.'},
+  es:{sub:'El conectoma como pincel · B_RR_K_',t_sugar:'Azúcar',t_bitter:'Amargo',t_shadow:'Sombra',t_place:'Colocar',
+    play:'Reanudar',pause:'Pausar',clear:'Nueva observación',confirm:'¿Seguro?',export:'PNG',overlay:'Mosca',params:'Parámetros',
+    speed:'Velocidad',brush:'Trazo',photo:'Visión',noise:'Ruido',palette:'Paleta',bg:'Fondo',
+    smell:'Olfato',smell_note:'experimental: el lóbulo antenal puede desbocarse',size:'Tamaño',size_poster:'Cartel, vertical',size_poster_h:'Cartel, horizontal',size_square:'Cuadrado',size_wide:'Ventana 16:10',size_pano:'Panorámico 2:1',size_custom:'Tamaño libre',apply:'Aplicar',pal_obs:'Observación',pal_chem:'Química',pal_beh:'Conducta',pal_ink:'Tinta',bg_paper:'Papel',bg_black:'Negro',seed:'Semilla',
+    newbrain:'Nueva',eye:'Ojo',eye_note:'2 × 61 omatidios',brain:'Cerebro',behavior:'Conducta',chem:'Química',hz:'Hz',
+    b_walk:'Camina',b_back:'Atrás',b_groom:'Acicala',b_feed:'Come',b_jump:'Vuela',b_fly:'Vuela',b_away:'Fuera',b_idle:'Quieta',
+    m_walk:'Camina DNp09',m_turn:'Gira DNa02',m_back:'Atrás MDN',m_groom:'Acicala aBN1',m_feed:'Come MN9',m_gf:'Huida DNp01',m_load:'Pintura',m_sat:'Saciedad',
+    raster_note:'Cada fila son ~440 neuronas. De arriba abajo: GRN de azúcar y amargo, ORN, JO, LC4/LPLC2, detectores de objetos (LC10, LC9…), movimiento (LPC1), tangenciales LT, otros sensores, lóbulos ópticos (84.000), cerebro central, descendentes, salidas y, al final, los puentes sintéticos.',
+    types_note:'Tipos celulares reales más activos ahora (nombres de FlyWire).',
+    hint:'No hay interacción: solo mirar. La mosca está sobre el cristal de una ventana; cuando vuela, el trazo se interrumpe. Espacio: pausa · H: ocultar la mosca.',
+    src_h:'De dónde sale este cerebro',
+    honest:'Cerebro completo FlyWire v783: 138.639 neuronas y 15.091.983 conexiones (54,5 millones de sinapsis), con el modelo LIF de Shiu et al. 2024, sin filtrar. Reciben entrada estos sensores: GRN de azúcar y amargo, ORN DM1/DM2/DM4, JO-C/E, LC4, LPLC2 y los detectores de objetos y movimiento (LC10, LC9, LC11, LC31, LC33, LPC1, LLPC1, LT51, LT52); las otras ~136.000 neuronas propagan la actividad por todo el cerebro. Salidas: DNa02, DNa01, DNp09, MDN, DNp01, MN9, aBN1. Siguen siendo sintéticos: las ganas básicas de caminar, los giros al azar, el giro hacia el olor y el tacto con las paredes (~110 neuronas). No incluye el cordón nervioso (VNC): FlyWire es solo el cerebro. La codificación de la retina es un modelo simplificado. El olfato está apagado por defecto: en el cerebro completo basta un disparo por segundo en los ORN para que el lóbulo antenal (PN y LN) se quede a ~300 Hz incluso tras retirar el olor, y eso activa sin parar la DNa02 izquierda. El modelo de Shiu no tiene inhibición lenta ni adaptación, que en la mosca real lo frenan. Al apagarlo se reinicia el cerebro. Ventana y vuelo: el entorno (luz de ventana, una sombra que pasa de vez en cuando, polvo que se acumula en las antenas) alimenta sensores reales (LC4/LPLC2, JO), y el cerebro decide si huye o se acicala. El vuelo es sintético: el vuelo de huida lo dispara una ráfaga de la fibra gigante (DNp01); los despegues voluntarios, la trayectoria de vuelo (tramos rectos y sacadas rápidas) y la tendencia a subir (geotaxis negativa) son modelos sencillos. Las paradas se miden con el reloj del observador (hora real); la mosca vive a cámara lenta (cerebro completo, ×0,3 aprox.). Se ha añadido a las neuronas reales una adaptación débil (τ 400 ms): sin ella, en bucle cerrado, el lóbulo antenal y el cuerpo fungiforme se bloqueaban a ~300 Hz al cabo de unos minutos.',
+    cite:'Modo Observación: homenaje a «Observación de los movimientos de una mosca…» de Walter Marchetti (1967). Datos: FlyWire v783 (Dorkenwald et al. 2024; Schlegel et al. 2024, Nature). Modelo y listas de neuronas: Shiu et al. 2024, Nature 634. Licencia CC BY.',
+    seed_note:'La semilla solo cambia los puentes sintéticos y el mapa LC-omatidio; el cableado real es siempre el mismo. Visión: ganancia de la retina.',
+    neurons:'neuronas',synapses:'conexiones',save:'Guardar PNG',close:'Cerrar',save_hint:'Si la descarga no funciona: clic derecho en la imagen → guardar.',fps:'fps',real:'reales',synth:'sint.'},
+  en:{sub:'The connectome as a brush · B_RR_K_',t_sugar:'Sugar',t_bitter:'Bitter',t_shadow:'Shadow',t_place:'Place',
+    play:'Run',pause:'Pause',clear:'New observation',confirm:'Sure?',export:'PNG',overlay:'Fly',params:'Parameters',
+    speed:'Speed',brush:'Line',photo:'Vision',noise:'Noise',palette:'Palette',bg:'Ground',
+    smell:'Smell',smell_note:'experimental: the antennal lobe can run away',size:'Size',size_poster:'Poster, portrait',size_poster_h:'Poster, landscape',size_square:'Square',size_wide:'Window 16:10',size_pano:'Panoramic 2:1',size_custom:'Custom size',apply:'Apply',pal_obs:'Observation',pal_chem:'Chemistry',pal_beh:'Behaviour',pal_ink:'Ink',bg_paper:'Paper',bg_black:'Black',seed:'Seed',
+    newbrain:'New',eye:'Eye',eye_note:'2 × 61 ommatidia',brain:'Brain',behavior:'Behaviour',chem:'Chemistry',hz:'Hz',
+    b_walk:'Walk',b_back:'Back',b_groom:'Groom',b_feed:'Feed',b_jump:'Flies',b_fly:'Flies',b_away:'Away',b_idle:'Still',
+    m_walk:'Walk DNp09',m_turn:'Turn DNa02',m_back:'Back MDN',m_groom:'Groom aBN1',m_feed:'Feed MN9',m_gf:'Escape DNp01',m_load:'Paint load',m_sat:'Satiety',
+    raster_note:'Each row is ~440 neurons. Top to bottom: sugar and bitter GRNs, ORNs, JO, LC4/LPLC2, object detectors (LC10, LC9…), motion (LPC1), LT tangentials, other sensors, optic lobes (84,000), central brain, descending, outputs and, last, the synthetic bridges.',
+    types_note:'Most active real cell types right now (FlyWire names).',
+    hint:'No interaction: just watch. The fly is on a window pane; when it flies, the trace breaks. Space: pause · H: hide the fly.',
+    src_h:'Where this brain comes from',
+    honest:'The whole FlyWire v783 brain: 138,639 neurons and 15,091,983 connections (54.5 million synapses), with the Shiu et al. 2024 LIF model, unfiltered. These sensors receive input: sugar and bitter GRNs, ORN DM1/DM2/DM4, JO-C/E, LC4, LPLC2 and the object and motion detectors (LC10, LC9, LC11, LC31, LC33, LPC1, LLPC1, LT51, LT52); the other ~136,000 neurons carry the activity across the whole brain. Outputs: DNa02, DNa01, DNp09, MDN, DNp01, MN9, aBN1. Still synthetic: the basic urge to walk, random turns, turning toward odour and wall touch (~110 neurons). No nerve cord (VNC): FlyWire is the brain only. The retina encoding is a simplified model. Smell is off by default: in the whole brain a single spike per second in the ORNs leaves the antennal lobe (PNs and LNs) firing at ~300 Hz even after the odour is gone, which keeps the left DNa02 on for good. The Shiu model has no slow inhibition or adaptation, which hold this in check in the real fly. Switching it off restarts the brain. Window and flight: the surroundings (window light, a shadow passing now and then, dust building up on the antennae) feed real sensors (LC4/LPLC2, JO), and the brain decides whether to flee or groom. Flight is synthetic: an escape flight is triggered by a giant-fibre (DNp01) burst; voluntary take-offs, the flight path (straight runs and fast saccades) and the urge to walk upward (negative geotaxis) are simple models. Pauses are timed on the observer’s clock (real time); the fly lives in slow motion (whole brain, about ×0.3). A weak adaptation (τ 400 ms) has been added to the real neurons: without it, in closed loop, the antennal lobe and mushroom body locked at ~300 Hz after a few minutes.',
+    cite:'Observation mode: a homage to Walter Marchetti’s «Observación de los movimientos de una mosca…» (1967). Data: FlyWire v783 (Dorkenwald et al. 2024; Schlegel et al. 2024, Nature). Model and neuron lists: Shiu et al. 2024, Nature 634. CC BY licence.',
+    seed_note:'The seed only changes the synthetic bridges and the LC-to-ommatidium map; the real wiring never changes. Vision: retina gain.',
+    neurons:'neurons',synapses:'connections',save:'Save PNG',close:'Close',save_hint:'If the download does nothing: right-click the image → save.',fps:'fps',real:'real',synth:'synth.'}
+};
+let LANG='eu';
+const T=k=>I18N[LANG][k]??k;
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=T(el.dataset.i)});
+  ['eu','es','en'].forEach(l=>document.getElementById('lang-'+l).classList.toggle('on',l===LANG));
+  document.querySelector('#run [data-i]').textContent=T(running?'pause':'play');
+  buildMeters();
+}
+
+// ---------- RNG ----------
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+// ---------- Neurotransmitters (FlyWire top_nt predictions) ----------
+const NT_NAMES=['ACh','GABA','Glu','DA','5-HT','OA'];
+const NT_COL=[[30,33,66],[30,33,66],[30,33,66],[30,33,66],[30,33,66],[30,33,66]];   // Marchetti sheet: navy only
+
+// ---------- Compound eye: 61 hexagonal ommatidia per side ----------
+function hexCells(R){const c=[];for(let q=-R;q<=R;q++)for(let r=Math.max(-R,-q-R);r<=Math.min(R,-q+R);r++)c.push({q,r,x:q+r/2,y:r*Math.sqrt(3)/2});return c}
+const HEX=hexCells(4);
+const hexDist=(a,b)=>(Math.abs(a.q-b.q)+Math.abs(a.r-b.r)+Math.abs(a.q+a.r-b.q-b.r))/2;
+// each ommatidium looks at a point on the ground: x → azimuth (front..rear), y → distance (near..far)
+const OMMA=HEX.map(c=>{const t=(c.x+4)/8,u=(c.y+3.4641)/6.9282;return{az:(170-160*t)*Math.PI/180,dist:16*Math.pow(10,u)}});
+
+// ---------- Connectome decode ----------
+function unb64(s,Ty){const bin=atob(s),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Ty(u.buffer)}
+const C=CONNECTOME;
+let R_NT,R_TY,R_PTR,R_COL,R_W;
+// whole-brain data: 35 MB gzip — embedded (offline file) or fetched in chunks next to the page (online)
+// offline fallback: choose eulia_garuna_0.js and eulia_garuna_1.js by hand (any folder, any name)
+function pickBrainFiles(){return new Promise(resolve=>{
+  const box=document.getElementById('ld-pick'),inp=document.getElementById('ld-file'),msg=document.getElementById('ld-pmsg');box.hidden=false;
+  inp.addEventListener('change',async()=>{const parts=[];
+    for(const f of inp.files){const t=await f.text();const m=t.match(/\[(\d)\]="([A-Za-z0-9+/=]+)"/);if(m)parts[+m[1]]=m[2]}
+    if(parts[0]&&parts[1]){box.hidden=true;resolve(parts[0]+parts[1])}
+    else msg.textContent='eulia_garuna_0.js + eulia_garuna_1.js (2)'});
+})}
+async function loadBrain(progress){
+  let gz;
+  let B64=typeof BRAIN_B64==='string'?BRAIN_B64:(window.BRAIN_PARTS&&BRAIN_PARTS.filter(Boolean).length===2?BRAIN_PARTS.join(''):null);
+  if(!B64&&location.protocol==='file:')B64=await pickBrainFiles();   // companion files not next to the page: let the viewer point to them
+  if(B64){progress(.05);const bin=atob(B64);gz=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)gz[i]=bin.charCodeAt(i)}
+  else{if(location.protocol==='file:')throw new Error('eulia_garuna_0.js + eulia_garuna_1.js → EULIA_osoa.html karpeta berean / misma carpeta / same folder');
+    const parts=[];let got=0;for(let k=0;k<C.chunks;k++){const r=await fetch(`brain.${k}.txt`);if(!r.ok)throw new Error('brain chunk '+k);
+      const t=atob((await r.text()).trim()),b=new Uint8Array(t.length);for(let i=0;i<t.length;i++)b[i]=t.charCodeAt(i);parts.push(b);got+=b.length;progress(.6*got/C.gzBytes)}
+    gz=new Uint8Array(got);let o=0;for(const p of parts){gz.set(p,o);o+=p.length}}
+  progress(.65);
+  const buf=await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  progress(.9);
+  const n=C.n,E=C.nedges;let o=0;
+  R_PTR=new Int32Array(buf,o,n+1);o+=4*(n+1);R_COL=new Int32Array(buf,o,E);o+=4*E;R_W=new Int16Array(buf,o,E);o+=2*E;
+  R_NT=new Uint8Array(buf,o,n);o+=n;o+=n;R_TY=new Uint16Array(buf,o,n);
+  for(let i=0;i<n;i++){let acc=0;for(let k=R_PTR[i],e=R_PTR[i+1];k<e;k++){if(k===R_PTR[i])acc=R_COL[k];else acc+=R_COL[k];R_COL[k]=acc}}  // un-delta the column indices
+  progress(1);
+}
+const NR=C.n,W_SYN=.275/7;                         // Shiu et al.: 0.275 mV per synapse, 7 mV rest→threshold
+const GROUP_END=C.groups.reduce((a,g)=>(a.push((a.at(-1)||0)+g),a),[]);
+const SENSORY_END=GROUP_END[3];                   // GRN, ORN, JO (LC4/LPLC2 are group 4)
+const both=o=>o.L.concat(o.R);
+
+// ---------- Brain: real core + synthetic bridges ----------
+function buildBrain(seed){
+  const rnd=mulberry32(seed);
+  const pops={};let N=NR;const synth=[];
+  const def=(name,n,nt,o={})=>{pops[name]={start:N,n,nt,adapt:o.adapt||0,adTau:o.adTau||400,noise:o.noise??1,idx:Array.from({length:n},(_,i)=>N+i)};N+=n;synth.push(name)};
+    def('EX_L',24,0,{adapt:.04,noise:1.6});def('EX_R',24,0,{adapt:.04,noise:1.6}); // spontaneous left/right bias
+  def('EXI_L',8,2);def('EXI_R',8,2);
+  def('BOUT',12,0,{adapt:.004,adTau:2500,noise:1.4});                    // walking bouts
+  def('TCH_L',12,0,{noise:.3});def('TCH_R',12,0,{noise:.3});           // antennal wall contact
+  def('STOP_F',6,1);def('STOP_G',6,1);                                    // halt locomotion while feeding / grooming
+  const S=C.S,Tt=C.T;
+  const E=[];                                                             // [pre,post,weight,gainGroup]
+  const link=(A,B,p,w,o={})=>{const g=o.g||0,jit=o.jit??.3;for(const i of A)for(const j of B){if(i===j)continue;if(o.f&&!o.f(i,j))continue;if(rnd()<p)E.push(i,j,w*(1+jit*(rnd()*2-1)),g)}};
+  const P=n=>pops[n].idx;
+  for(const s of['L','R']){
+    const o=s==='L'?'R':'L';
+    link(P('EX_'+s),P('EX_'+s),.3,.25);link(P('EX_'+s),P('EXI_'+s),.4,.3);link(P('EXI_'+s),P('EX_'+o),.6,-.8);
+    link(P('EX_'+s),Tt.DNa02[s],.5,.12);link(P('EX_'+s),Tt.P9[s],.5,.08);
+    link(P('BOUT'),Tt.P9[s],1,.35);
+    link(S.odor[s],Tt.DNa02[s],.25,.2);link(C.odorPN[s],P('BOUT'),.6,.12);   // odour side → steering (bridge); real PN activity → arousal
+    link(P('TCH_'+s),Tt.DNa02[o],.7,.25);link(P('TCH_'+s),Tt.MDN[s],.6,.12);link(P('TCH_'+s),Tt.MDN[o],.3,.12);
+  }
+  link(P('BOUT'),P('BOUT'),.6,.34);
+  link(both(S.bitter),both(Tt.MDN),.4,.9);link(both(S.bitter),P('BOUT'),.3,-.35);  // bitter contact: back off
+  link(both(S.sugar),P('BOUT'),.3,-.3);                                               // tarsal sugar: stop
+  link(both(Tt.MN9),P('STOP_F'),1,1.2);link(both(Tt.aBN1),P('STOP_G'),1,1.2);
+  for(const st of['STOP_F','STOP_G']){link(P(st),P('BOUT'),.8,-.6);link(P(st),both(Tt.P9),1,-.6);link(P(st),both(Tt.DNa02),1,-.4)}
+  // LC4/LPLC2 columns → ommatidia (retinotopy approximated)
+  // each visual column neuron (LC4, LPLC2, LC10, LC9, LPC1…) looks through one ommatidium (retinotopy approximated)
+  // LC10 & co. look at the frontal field (c.x ≥ 2 → azimuth ≤ 50°); LC4/LPLC2/LPC1 cover the whole eye
+  const FRONT=HEX.map((c,k)=>c.x>=2?k:-1).filter(k=>k>=0);
+  const loomOmma={};for(const k of['loom','v_motion'])for(const s of['L','R'])for(const i of S[k][s])loomOmma[i]=Math.floor(rnd()*61);
+  for(const s of['L','R'])for(const i of S.v_obj[s])loomOmma[i]=FRONT[Math.floor(rnd()*FRONT.length)];
+  // real wiring stays in its own compact arrays (R_PTR/R_COL/R_W); the synthetic bridges get a small CSR of their own
+  const nE=E.length/4,cnt=new Int32Array(N+1);
+  for(let k=0;k<nE;k++)cnt[E[k*4]+1]++;
+  for(let i=0;i<N;i++)cnt[i+1]+=cnt[i];
+  const col=new Int32Array(nE),wt=new Float32Array(nE),grp=new Uint8Array(nE),fill=cnt.slice(0,N);
+  for(let k=0;k<nE;k++){const at=fill[E[k*4]]++;col[at]=E[k*4+1];wt[at]=E[k*4+2];grp[at]=E[k*4+3]}
+  const gDec=new Float32Array(N),resetG=new Uint8Array(N),adDec=new Float32Array(N),adc=new Float32Array(N),nz=new Float32Array(N),nt=new Uint8Array(N),isPoi=new Uint8Array(N);
+  for(let i=0;i<NR;i++){gDec[i]=Math.exp(-1/5);resetG[i]=1;adDec[i]=1;nt[i]=R_NT[i]}
+  for(const k of['sugar','bitter','odor','jo_ce','loom','v_obj','v_motion','v_wide'])for(const i of both(S[k]))isPoi[i]=1;
+  for(const n of synth){const p=pops[n];for(const i of p.idx){gDec[i]=Math.exp(-1/10);adDec[i]=Math.exp(-1/p.adTau);adc[i]=p.adapt;nz[i]=p.noise;nt[i]=p.nt}}
+  const ntCount=new Float32Array(6);for(let i=0;i<N;i++)ntCount[nt[i]]++;
+  return{seed,N,nSynthE:nE,pops,loomOmma,rowPtr:cnt,col,wt,grp,gDec,resetG,adDec,adc,nz,nt,isPoi,ntCount,
+    v:new Float32Array(N),g:new Float32Array(N),buf:[new Float32Array(N),new Float32Array(N),new Float32Array(N)],t:0,
+    ref:new Uint8Array(N),tr:new Float32Array(N),ad:new Float32Array(N),ext:new Float32Array(N),poi:new Float32Array(N),
+    spk:new Uint8Array(N),recent:new Float32Array(N),gain:new Float32Array([1,1,0]),ntSpk:new Float32Array(6),fired:new Int32Array(N)};
+}
+
+const DT=Math.exp(-1/100);
+// spike-frequency adaptation for the real neurons (added to Shiu's LIF): without it the whole brain
+// ignites in closed loop (antennal lobe and mushroom body lock at ~300 Hz)
+let ADC_REAL=.006;
+function simStep(B,noise){
+  const{N,v,g,buf,ref,tr,ad,adDec,ext,poi,isPoi,gDec,resetG,adc,nz,rowPtr,col,wt,grp,gain,spk,nt,ntSpk,fired}=B;
+  const now=buf[B.t%3],later=buf[(B.t+2)%3];B.t++;
+  let nf=0;const adR=Math.exp(-1/400),gdR=Math.exp(-1/5),nR=NR,RP=R_PTR,RC=R_COL,RW=R_W,ws=W_SYN;
+  // real neurons: Shiu et al. LIF, no noise, no adaptation
+  for(let i=0;i<nR;i++){
+    g[i]+=now[i];now[i]=0;tr[i]*=DT;
+    if(isPoi[i]){if(poi[i]>0&&Math.random()<poi[i]*.001)fired[nf++]=i;continue}
+    if(ref[i]>0){ref[i]--;continue}
+    const gi=g[i];let a=ad[i];if(gi===0&&v[i]===0&&a===0)continue;
+    if(a!==0){a*=adR;if(a<1e-3)a=0;ad[i]=a}
+    if(gi<1e-5&&gi>-1e-5&&v[i]<1e-5&&v[i]>-1e-5&&a===0){g[i]=0;v[i]=0;continue}
+    v[i]+=.05*(gi-ADC_REAL*a-v[i]);g[i]=gi*gdR;
+    if(v[i]>=1){v[i]=0;g[i]=0;ref[i]=2;fired[nf++]=i}
+  }
+  // synthetic bridge neurons
+  for(let i=nR;i<N;i++){
+    g[i]+=now[i];now[i]=0;tr[i]*=DT;ad[i]*=adDec[i];
+    if(ref[i]>0){ref[i]--;continue}
+    v[i]+=.05*(g[i]+ext[i]-adc[i]*ad[i]-v[i])+noise*nz[i]*(Math.random()*2-1);
+    g[i]*=gDec[i];
+    if(v[i]>=1){v[i]=0;if(resetG[i])g[i]=0;ref[i]=2;fired[nf++]=i}
+  }
+  for(let f=0;f<nf;f++){const i=fired[f];tr[i]+=1;ad[i]+=1;spk[i]=1;ntSpk[nt[i]]++;
+    if(i<nR)for(let k=RP[i],e=RP[i+1];k<e;k++)later[RC[k]]+=RW[k]*ws;
+    for(let k=rowPtr[i],e=rowPtr[i+1];k<e;k++)later[col[k]]+=wt[k]*gain[grp[k]]}
+}
+function rateOf(B,idx){let s=0;for(const i of idx)s+=B.tr[i];return s/idx.length*10}
+function setExt(B,name,val){const p=B.pops[name];B.ext.fill(val,p.start,p.start+p.n)}
+function setPoi(B,idx,hz){for(const i of idx)B.poi[i]=hz}
+</script>
+<script>
+// ---------- World ----------
+let W=1272,H=1800,DS=4,LW=W/DS,LH=H/DS,SG=8,SW=W/SG,SH=H/SG;
+const paint=document.getElementById('paint'),pc=paint.getContext('2d');
+const ovl=document.getElementById('ovl'),oc=ovl.getContext('2d');
+const low=document.createElement('canvas');low.width=LW;low.height=LH;const lc=low.getContext('2d',{willReadFrequently:true});
+const stimC=document.createElement('canvas');stimC.width=SW;stimC.height=SH;const sc=stimC.getContext('2d');
+let lowData=null;
+let sugar=new Float32Array(SW*SH),bitter=new Float32Array(SW*SH),odor=new Float32Array(SW*SH);
+let stimDirty=true;
+
+const PAL={
+  paper:{bg:[236,230,214],ink:[20,20,20],cob:[39,67,214],gold:[217,154,30],verm:[232,50,26],sero:[142,44,138]},
+  obs:{bg:[244,243,238],ink:[30,33,66],cob:[30,33,66],gold:[30,33,66],verm:[30,33,66],sero:[30,33,66],dot:[20,20,26],green:[64,142,60]},
+  black:{bg:[11,11,12],ink:[236,230,214],cob:[91,123,255],gold:[240,180,60],verm:[255,74,42],sero:[214,106,208]}
+};
+const P={smell:false,speed:1,brush:2,photo:1,noise:1,pal:'obs',bg:'paper',show:true,tool:'sugar'};
+let running=true,B=null,simMs=0;
+const fly={x:W/2,y:H/2,th:-Math.PI/2,load:0,sat:0,lc:[20,20,20],phase:0,jump:0,jvx:0,jvy:0,jcool:0,beh:'idle',v:0,bx:W/2,by:H/2};
+const eyeLum=[new Float32Array(61),new Float32Array(61)],eyePrev=[new Float32Array(61).fill(.9),new Float32Array(61).fill(.9)];
+let adaptMean=.9;
+const M={walk:0,turn:0,back:0,grm:0,fdg:0,gf:0,lcL:0,lcR:0};
+const chem=new Float32Array(6);
+const shadows=[];
+
+const curPal=()=>P.pal==='obs'?PAL.obs:PAL[P.bg];
+const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+
+let BG_LUM=.9;
+function clearPaint(){OBS.start=new Date();OBS.clock=0;OBS.stop=null;OBS.labels.length=0;OBS.dash=0;fly.bx=fly.x;fly.by=fly.y;const bb=curPal().bg;BG_LUM=(.299*bb[0]+.587*bb[1]+.114*bb[2])/255;pc.globalAlpha=1;pc.globalCompositeOperation='source-over';pc.fillStyle=rgb(curPal().bg);pc.fillRect(0,0,W,H);
+}
+
+function updateLow(){
+  lc.globalAlpha=1;lc.drawImage(paint,0,0,LW,LH);
+  for(const s of shadows){lc.globalAlpha=s.a;lc.fillStyle='#000';lc.beginPath();lc.arc(s.x/DS,s.y/DS,s.r/DS,0,Math.PI*2);lc.fill()}
+  lc.globalAlpha=1;lowData=lc.getImageData(0,0,LW,LH).data;
+}
+function lumAt(x,y){if(x<0||y<0||x>=W||y>=H)return BG_LUM;const i=((y/DS|0)*LW+(x/DS|0))*4;return(.299*lowData[i]+.587*lowData[i+1]+.114*lowData[i+2])/255}
+function colAt(x,y){x=cl(x,0,W-1);y=cl(y,0,H-1);const i=((y/DS|0)*LW+(x/DS|0))*4;return[lowData[i],lowData[i+1],lowData[i+2]]}
+function gridAt(g,x,y){if(x<0||y<0||x>=W||y>=H)return 0;return g[(y/SG|0)*SW+(x/SG|0)]}
+function addBlob(g,x,y,rad,amt){const r=Math.ceil(rad/SG)+1,cx=x/SG,cy=y/SG,s2=2*(rad/SG/1.6)**2;
+  for(let j=Math.max(0,(cy|0)-r);j<=Math.min(SH-1,(cy|0)+r);j++)for(let i=Math.max(0,(cx|0)-r);i<=Math.min(SW-1,(cx|0)+r);i++){
+    const d2=(i+.5-cx)**2+(j+.5-cy)**2;const k=j*SW+i;g[k]=cl(g[k]+amt*Math.exp(-d2/s2),0,1);if(amt<0&&g[k]<.06)g[k]=0}stimDirty=true}
+function updateOdor(){ // three box-blur passes over the sugar grid
+  let a=Float32Array.from(sugar),b=new Float32Array(SW*SH);const R=8,n=2*R+1;
+  for(let pass=0;pass<3;pass++){
+    for(let y=0;y<SH;y++){let s=0;for(let x=-R;x<=R;x++)s+=a[y*SW+cl(x,0,SW-1)];for(let x=0;x<SW;x++){b[y*SW+x]=s/n;s+=a[y*SW+Math.min(SW-1,x+R+1)]-a[y*SW+Math.max(0,x-R)]}}
+    for(let x=0;x<SW;x++){let s=0;for(let y=-R;y<=R;y++)s+=b[cl(y,0,SH-1)*SW+x];for(let y=0;y<SH;y++){a[y*SW+x]=s/n;s+=b[Math.min(SH-1,y+R+1)*SW+x]-b[Math.max(0,y-R)*SW+x]}}
+  }
+  for(let k=0;k<odor.length;k++)odor[k]=Math.min(1,a[k]*12);
+}
+
+// ---------- Sensing ----------
+const ODA=[new Float32Array(61),new Float32Array(61)];
+const SMALL_PATCH=HEX.map(c=>HEX.map((h,k)=>hexDist(h,c)<=1?k:-1).filter(k=>k>=0)),
+  SURROUND=HEX.map(c=>HEX.map((h,k)=>{const d=hexDist(h,c);return d>=2&&d<=3?k:-1}).filter(k=>k>=0)),OD=new Float32Array(61),MO=new Float32Array(61);
+const eyeDark=[new Float32Array(61),new Float32Array(61)];
+// LC4/LPLC2 have wide receptive fields: each pools the darkening of ~19 neighbouring ommatidia
+const LOOM_PATCH=HEX.map(c=>HEX.map((h,k)=>hexDist(h,c)<=2?k:-1).filter(k=>k>=0)),PD=new Float32Array(61);
+function sense(){
+  const{x,y,th}=fly;let sum=0;
+  for(let s=0;s<2;s++){const sg=s===0?-1:1,L=eyeLum[s],Pv=eyePrev[s];
+    for(let k=0;k<61;k++){const o=OMMA[k],a=th+sg*o.az;Pv[k]+=(L[k]-Pv[k])*.25;L[k]=lumAt(x+Math.cos(a)*o.dist,y+Math.sin(a)*o.dist);sum+=L[k]}}
+  adaptMean+=(sum/122-adaptMean)*.05;
+  const Tt=C.T,S=C.S;
+  const vg=P.photo,dtV=Math.max(1,lastSteps)/1000;
+  for(let s=0;s<2;s++){const side=s?'R':'L',L=eyeLum[s],D=eyeDark[s];let wide=0;
+    for(let k=0;k<61;k++){D[k]=Math.max(0,eyePrev[s][k]-L[k]);wide+=L[k]}
+    // retina model → real visual columns: small dark objects (LC10, LC9, LC11, LC31, LC33), local motion (LPC1, LLPC1), wide-field darkness (LT51, LT52…)
+    // object detectors are size-tuned: centre darker than its surround (a big shadow darkens both and cancels)
+    for(let k=0;k<61;k++){let o=0,mo=0,su=0;for(const q of SMALL_PATCH[k]){o+=L[q];mo+=Math.abs(L[q]-eyePrev[s][q])}
+      for(const q of SURROUND[k])su+=L[q];
+      o/=SMALL_PATCH[k].length;su/=SURROUND[k].length;
+      // object detectors adapt (τ≈1 s): a mark that stays in view fades out, a new one pops
+      const raw=Math.max(0,su-o-.04),A=ODA[s];A[k]+=(raw-A[k])*Math.min(1,dtV/1);OD[k]=Math.max(0,raw-.8*A[k]);MO[k]=mo/SMALL_PATCH[k].length}
+    for(const i of S.v_obj[side])B.poi[i]=Math.min(200,vg*OBJ_GAIN*OD[B.loomOmma[i]]);
+    for(const i of S.v_motion[side])B.poi[i]=Math.min(200,vg*MOT_GAIN*Math.max(0,MO[B.loomOmma[i]]-.01));
+    setPoi(B,S.v_wide[side],Math.min(200,vg*WIDE_GAIN*Math.max(0,.92-wide/61)));
+    // real LC4 / LPLC2 looming columns: Poisson rate from local darkening
+    for(let k=0;k<61;k++){let m=0;for(const q of LOOM_PATCH[k])m+=D[q];PD[k]=m/LOOM_PATCH[k].length}
+    for(const i of S.loom[side])B.poi[i]=Math.min(250,LOOM_GAIN*Math.max(0,PD[B.loomOmma[i]]-.06));
+  }
+  // antennae: real ORNs (odour) and synthetic wall contact
+  for(let s=0;s<2;s++){const sg=s?1:-1,a=th+sg*.7,ax=x+Math.cos(a)*24,ay=y+Math.sin(a)*24,side=s?'R':'L';
+    setPoi(B,S.odor[side],P.smell?110*(1-.9*fly.sat)*Math.sqrt(gridAt(odor,ax,ay)):0);
+    const m=obsOn()?50:18,wall=ax<m||ay<m||ax>W-m||ay>(obsOn()?H-OBS_TITLE_H:H)-m;setExt(B,'TCH_'+side,wall&&!fly.fl?5:0)}
+  // real gustatory receptor neurons (legs + labellum) and Johnston's organ (paint on the antennae)
+  setPoi(B,both(S.sugar),200*(1-.75*fly.sat)*gridAt(sugar,x,y));
+  setPoi(B,both(S.bitter),150*gridAt(bitter,x,y));
+  setPoi(B,both(S.jo_ce),JO_GAIN*fly.load);
+  setExt(B,'EX_L',1.0);setExt(B,'EX_R',1.0);// slow arousal (synthetic, part of the walking bridge): an Ornstein-Uhlenbeck drift, τ≈25 s; low arousal or a full crop → long rests
+  const dtS=Math.max(1,Math.round(16*P.speed))/1000;AROUSAL+=-AROUSAL*dtS/25+Math.sqrt(dtS)*.28*(Math.random()*2-1)*1.73;
+  setExt(B,'BOUT',BOUT_EXT+.7*Math.max(-1.2,Math.min(.5,AROUSAL))-.3*fly.sat);
+}
+
+// ---------- Acting / painting ----------
+let AROUSAL=0,BOUT_EXT=1.0,LOOM_GAIN=700,JO_GAIN=200,TH_GF=40,OBJ_GAIN=120,MOT_GAIN=400,WIDE_GAIN=80;
+const CHEM_K=[1,1,1,20,15,8];
+function brushColor(kind){
+  const pal=curPal();
+  if(P.pal==='ink')return pal.ink;
+  if(P.pal==='beh')return kind==='groom'?pal.verm:kind==='jump'?pal.gold:pal.ink;
+  const exc=chem[0],inh=chem[1]+chem[2];
+  const t=cl((inh/(exc+inh+1e-6)-.25)*2.5);
+  let c=mix(pal.ink,pal.cob,t);c=mix(c,pal.sero,cl(chem[4]/CHEM_K[4]));c=mix(c,pal.gold,cl(chem[3]/CHEM_K[3]));c=mix(c,pal.verm,cl(chem[5]/CHEM_K[5]));
+  return mix(c,fly.lc,fly.load*.3);
+}
+function seg(x0,y0,x1,y1,w,c,a){pc.globalAlpha=a;pc.strokeStyle=rgb(c);pc.lineWidth=w;pc.lineCap='round';pc.beginPath();pc.moveTo(x0,y0);pc.lineTo(x1,y1);pc.stroke();pc.globalAlpha=1}
+function dab(x,y,r,c,a){pc.globalAlpha=a;pc.fillStyle=rgb(c);pc.beginPath();pc.arc(x,y,r,0,Math.PI*2);pc.fill();pc.globalAlpha=1}
+function smudge(x0,y0,x1,y1,r){pc.save();pc.globalAlpha=.55;pc.beginPath();pc.arc(x1,y1,r,0,Math.PI*2);pc.clip();
+  pc.drawImage(paint,x0-r,y0-r,2*r,2*r,x1-r,y1-r,2*r,2*r);pc.restore()}
+
+// ---------- Behaketa: Marchetti-style notation ----------
+const OBS={clock:0,start:new Date(),stop:null,labels:[],dash:0};
+let TU=26,LBL=15,OBS_TITLE_H=140;const OBS_FONT='"Helvetica Neue",Helvetica,Arial,sans-serif';
+const obsOn=()=>P.pal==='obs';
+// type sizes follow the sheet width (Marchetti's title runs at ~2% of the sheet width)
+function layoutTitle(){TU=Math.round(W*.022);LBL=Math.max(14,Math.round(W*.0125));OBS_TITLE_H=Math.round(TU*5.4)}
+layoutTitle();
+function fmtDur(ms){const s=Math.round(ms/1000),h=s/3600|0,m=(s%3600)/60|0,x=String(s%60).padStart(2,'0');
+  return h?`${h}h.${m}m.${x}s.`:m?`${m}m.${x}s.`:`${x}s.`}
+function obsSeg(x0,y0,x1,y1){const len=Math.hypot(x1-x0,y1-y0);if(len<.05)return;const bw=P.brush;
+  pc.save();pc.strokeStyle=rgb(PAL.obs.ink);pc.lineWidth=1.6+bw*.7;pc.lineCap='butt';pc.lineJoin='round';
+  pc.setLineDash([5+bw*3,3+bw*2]);pc.lineDashOffset=OBS.dash;pc.beginPath();pc.moveTo(x0,y0);pc.lineTo(x1,y1);pc.stroke();pc.restore();OBS.dash+=len}
+function obsStopTick(){const st=OBS.stop;
+  if(!st){OBS.stop={x:fly.x,y:fly.y,t0:OBS.clock,dot:false,tag:''};return}
+  if(!st.dot&&OBS.clock-st.t0>=2500){st.dot=true;pc.fillStyle=rgb(PAL.obs.dot);pc.beginPath();pc.arc(st.x,st.y,3.5+P.brush,0,Math.PI*2);pc.fill()}}
+function obsStopEnd(){const st=OBS.stop;OBS.stop=null;if(!st||!st.dot)return;
+  const txt=fmtDur(OBS.clock-st.t0);pc.save();pc.font=`${LBL}px ${OBS_FONT}`;const w=pc.measureText(txt).width;
+  pc.font=`italic 11px ${OBS_FONT}`;const wt=st.tag?pc.measureText(st.tag).width+5:0;const tw=w+wt,th=LBL,r=5+P.brush;
+  const cands=[[r+5,5],[-r-5-tw,5],[r+3,-r-4],[-r-3-tw,r+14],[-tw/2,-r-8],[-tw/2,r+18]];
+  let pick=cands[0];
+  for(const[dx,dy]of cands){const x=st.x+dx,y=st.y+dy,box=[x-2,y-th,x+tw+2,y+4];
+    if(box[0]<8||box[2]>W-8||box[1]<8||box[3]>H-OBS_TITLE_H)continue;
+    if(OBS.labels.some(b=>!(box[2]<b[0]||box[0]>b[2]||box[3]<b[1]||box[1]>b[3])))continue;pick=[dx,dy];break}
+  const x=st.x+pick[0],y=st.y+pick[1];OBS.labels.push([x-2,y-th,x+tw+2,y+4]);
+  pc.fillStyle=rgb(PAL.obs.green);pc.font=`${LBL}px ${OBS_FONT}`;pc.fillText(txt,x,y);
+  if(st.tag){pc.globalAlpha=.75;pc.font=`italic 11px ${OBS_FONT}`;pc.fillText(st.tag,x+w+5,y)}
+  pc.restore()}
+const MONTHS={eu:['urtarrilaren','otsailaren','martxoaren','apirilaren','maiatzaren','ekainaren','uztailaren','abuztuaren','irailaren','urriaren','azaroaren','abenduaren'],
+  es:['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+  en:['January','February','March','April','May','June','July','August','September','October','November','December']};
+const hhmm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+function euDay(d){return d+({1:'ean',5:'ean',10:'ean',15:'ean',21:'ean',25:'ean',30:'ean',11:'n',31:'n'}[d]||'an')}
+function titleLines(lang,a,b){const d=a.getDate(),m=a.getMonth(),y=a.getFullYear(),t0=hhmm(a),t1=hhmm(b);
+  if(lang==='eu')return['Euli-garun baten mugimenduen behaketa','paper zuri baten gainean',`${t0}etatik ${t1}etara`,`${y}ko ${MONTHS.eu[m]} ${euDay(d)}`];
+  if(lang==='es')return['Observación de los movimientos de un cerebro de mosca','sobre una hoja de papel en blanco',`desde las ${t0} hasta las ${t1}`,`del ${d} de ${MONTHS.es[m]} de ${y}`];
+  return['Observation of the movements of a fly brain','on a blank sheet of paper',`from ${t0} to ${t1}`,`on ${d} ${MONTHS.en[m]} ${y}`]}
+function subLine(lang,a,b){const d=a.getDate(),m=a.getMonth(),y=a.getFullYear(),t0=hhmm(a),t1=hhmm(b),n=NR.toLocaleString(lang==='en'?'es':'en');
+  return lang==='en'?`Observación de los movimientos de un cerebro de mosca (FlyWire v783, ${n} neuronas reales) sobre una hoja de papel, desde las ${t0} hasta las ${t1} del ${d} de ${MONTHS.es[m]} de ${y}`
+    :`Observation of the movements of a fly brain (FlyWire v783, ${n} real neurons) on a sheet of paper, from ${t0} to ${t1} on ${d} ${MONTHS.en[m]} ${y}`}
+function drawObsTitle(ctx){const a=OBS.start,b=new Date(),L=titleLines(LANG,a,b);
+  ctx.save();ctx.fillStyle=rgb(PAL.obs.green);ctx.textBaseline='alphabetic';ctx.font=`${TU}px ${OBS_FONT}`;const u=TU;
+  const pos=[[W*.03,H-3.9*u],[W*.47,H-2.7*u],[W*.13,H-1.6*u],[W*.43,H-.5*u]];
+  L.forEach((ln,i)=>ctx.fillText(ln,pos[i][0],pos[i][1]));
+  const sf=Math.max(10,Math.round(u*.37));ctx.font=`italic ${sf}px ${OBS_FONT}`;const words=subLine(LANG,a,b).split(' ');let line='',y=H-3.9*u+sf*1.35;const sx=W*.03+u*.25;
+  for(const w of words){const tst=line?line+' '+w:w;if(ctx.measureText(tst).width>W*.4){ctx.fillText(line,sx,y);y+=sf*1.2;line=w}else line=tst}
+  if(line)ctx.fillText(line,sx,y);ctx.restore()}
+
+// ---------- Flight (synthetic): straight runs + body saccades, leaves the pane and comes back ----------
+const FLY_V=1.1,GEO=.00018;          // px per sim-ms in the air (~20 cm/s); upward steering gain while walking
+function rnd(a,b){return a+Math.random()*(b-a)}
+function startFlight(mode,escape){
+  if(obsOn())obsStopEnd();
+  let dir=fly.th+rnd(-.8,.8);
+  if(escape){const bias=cl((M.lcL-M.lcR)/(M.lcL+M.lcR+1),-1,1);dir=fly.th+bias*1.6+rnd(-.4,.4)}
+  if(mode==='enter'){fly.fl={mode:'away',phase:'gone',t:0,tEnd:rnd(800,2500),sac:0};fly.x=-200;fly.y=-200;fly.beh='away';return}
+  fly.fl={mode,phase:'air',t:0,tEnd:mode==='hop'?rnd(350,1400):1e9,dir,sac:rnd(60,220),tx:0,ty:0};
+  fly.jcool=1500;fly.beh='fly';
+}
+function flyStep(steps){
+  const f=fly.fl,yMax=H-(obsOn()?OBS_TITLE_H:0)-30;f.t+=steps;
+  if(f.phase==='gone'){fly.beh='away';if(f.t>=f.tEnd){ // come back from outside the view toward a landing spot
+      const e=Math.random()*4|0;fly.x=e===0?-60:e===1?W+60:rnd(0,W);fly.y=e===2?-60:e===3?H+60:rnd(0,H);
+      f.tx=rnd(70,W-70);f.ty=rnd(70,yMax-40);f.dir=Math.atan2(f.ty-fly.y,f.tx-fly.x);f.phase='in';f.t=0;f.sac=rnd(80,240)}
+    return}
+  fly.beh='fly';
+  f.sac-=steps;
+  if(f.sac<=0){f.dir+=(Math.random()<.5?-1:1)*rnd(.5,1.9);f.sac=rnd(70,260)}   // body saccade
+  if(f.phase==='in'){const want=Math.atan2(f.ty-fly.y,f.tx-fly.x);let da=want-f.dir;da=Math.atan2(Math.sin(da),Math.cos(da));f.dir+=da*(1-Math.exp(-steps/(f.t>2500?40:120)))}
+  const sp=FLY_V*(f.phase==='in'?Math.min(1,.35+Math.hypot(f.tx-fly.x,f.ty-fly.y)/260):1);
+  fly.x+=Math.cos(f.dir)*sp*steps;fly.y+=Math.sin(f.dir)*sp*steps;fly.th=f.dir;
+  const inside=fly.x>40&&fly.x<W-40&&fly.y>40&&fly.y<yMax;
+  if(f.mode==='hop'){if(!inside){const want=Math.atan2(H/2-fly.y,W/2-fly.x);f.dir+=Math.atan2(Math.sin(want-f.dir),Math.cos(want-f.dir))*.3}
+    if(f.t>=f.tEnd&&inside)land();return}
+  if(f.phase==='air'){if(fly.x<-120||fly.x>W+120||fly.y<-120||fly.y>H+120){f.phase='gone';f.t=0;f.tEnd=Math.exp(rnd(Math.log(3000),Math.log(120000)))}return}
+  if(f.phase==='in'&&(Math.hypot(f.tx-fly.x,f.ty-fly.y)<24||(f.t>6000&&inside)))land();
+}
+function land(){fly.fl=null;fly.x=cl(fly.x,30,W-30);fly.y=cl(fly.y,30,H-(obsOn()?OBS_TITLE_H:0)-30);fly.bx=fly.x;fly.by=fly.y;fly.beh='idle';fly.jcool=800}
+// ---------- Surroundings (synthetic): a shadow passing now and then, dust on the antennae ----------
+let nextShadow=rnd(40000,120000);
+function ambient(steps){
+  if(!fly.fl)fly.load=cl(fly.load+.000008*steps);
+  if(simMs>nextShadow){nextShadow=simMs+rnd(60000,180000);
+    const a=rnd(0,6.283),d=rnd(120,320);shadows.push({x:fly.fl?rnd(200,W-200):fly.x+Math.cos(a)*d,y:fly.fl?rnd(200,H-300):fly.y+Math.sin(a)*d,r:30,a:.55,amb:true,grow:true})}
+  for(const s of shadows)if(s.amb){if(s.grow){s.r+=.45*steps;if(s.r>420)s.grow=false}else s.a-=.0012*steps}
+  for(let i=shadows.length-1;i>=0;i--)if(shadows[i].a<=0)shadows.splice(i,1);
+}
+
+function act(steps){
+  const r=idx=>rateOf(B,idx),Tt=C.T;
+  M.walk=(r(Tt.P9.L)+r(Tt.P9.R))/2;
+  // DNa02 and unilateral P9 both turn the fly toward their own side (Rayshubskiy et al.; Bidaye et al. 2020)
+  M.turn=r(Tt.DNa02.R)+.5*r(Tt.DNa01.R)+.5*r(Tt.P9.R)-r(Tt.DNa02.L)-.5*r(Tt.DNa01.L)-.5*r(Tt.P9.L);
+  M.back=r(both(Tt.MDN));M.grm=Math.max(r(Tt.aBN1.L),r(Tt.aBN1.R));M.fdg=r(both(Tt.MN9));M.gf=r(both(Tt.GF));
+  M.lcL=r(C.S.loom.L);M.lcR=r(C.S.loom.R);
+  const gf=M.gf>TH_GF;   // giant-fibre burst → take-off
+  const pal=curPal(),bw=P.brush;
+  fly.jcool-=steps;fly.sat*=Math.pow(.9994,steps/16);
+  const ox=fly.x,oy=fly.y;
+  // --- flight (synthetic path; escape take-off from the real giant fibre) ---
+  if(fly.fl){flyStep(steps);return}
+  if(gf&&fly.jcool<=0){startFlight(Math.random()<.7?'away':'hop',true);return}
+  const lam=fly.beh==='walk'?1/45000:1/15000,top=fly.y<90?1/5000:0;       // voluntary take-off rate per ms (synthetic)
+  if(Math.random()<(lam+top)*steps){startFlight(Math.random()<.55?'hop':'away',false);return}
+  // --- action selection readout ---
+  const TH={feed:7,groom:12,back:15,walk:10};
+  let beh='idle';
+  if(M.fdg>TH.feed)beh='feed';
+  else if(M.grm>TH.groom)beh='groom';
+  else if(M.back>TH.back&&M.back>M.walk*.5)beh='back';
+  else if(M.walk>TH.walk)beh='walk';
+  fly.beh=beh;
+  const turnK=beh==='feed'||beh==='groom'?0:1;
+  const vK=beh==='walk'?.35+.65*cl((M.walk-6)/60):.35;   // slow flies turn less than fast ones
+  fly.th+=cl(M.turn/110,-1.2,1.2)*.0045*steps*turnK*vK;
+  if(beh==='walk')fly.th-=GEO*Math.cos(fly.th)*steps;   // flies on a window drift upward (negative geotaxis, synthetic)
+  let v=0;
+  if(beh==='walk')v=cl((M.walk-6)/50,0,1.4)*.1;
+  else if(beh==='back')v=-cl((M.back-8)/40,0,1)*.06;
+  const d=v*steps;
+  const mg=obsOn()?24:6,yMax=(obsOn()?H-OBS_TITLE_H:H)-mg,nx0=fly.x+Math.cos(fly.th)*d,ny0=fly.y+Math.sin(fly.th)*d;
+  fly.x=cl(nx0,mg,W-mg);fly.y=cl(ny0,mg,yMax);
+  // bumping into the edge: bounce off it (physics, not brain)
+  if(fly.x!==nx0)fly.th=Math.PI-fly.th+(Math.random()-.5)*.6;
+  if(fly.y!==ny0)fly.th=-fly.th+(Math.random()-.5)*.6;fly.v=v;
+  // pick up paint in front of the head
+  if(beh==='walk'||beh==='back'){
+    const hx=fly.x+Math.cos(fly.th)*10,hy=fly.y+Math.sin(fly.th)*10,c=colAt(hx,hy);
+    const ink=Math.hypot(c[0]-pal.bg[0],c[1]-pal.bg[1],c[2]-pal.bg[2])/441;
+    fly.load=cl(fly.load+ink*.004*steps/16*Math.abs(d)/3);fly.lc=mix(fly.lc,c,.08*ink);
+  }
+  // --- paint ---
+  if(obsOn()){
+    if(beh==='walk'||beh==='back'){if(OBS.stop)obsStopEnd();obsSeg(fly.bx,fly.by,fly.x,fly.y);fly.bx=fly.x;fly.by=fly.y}
+    else{obsStopTick();fly.bx=fly.x;fly.by=fly.y;
+      if(beh==='groom')fly.load*=Math.pow(.985,steps/16);
+      if(beh==='feed'){const hx=fly.x+Math.cos(fly.th)*9,hy=fly.y+Math.sin(fly.th)*9;addBlob(sugar,hx,hy,22,-.05*steps/16);fly.sat=cl(fly.sat+.02*steps/16)}}
+    return;
+  }
+  if(beh==='walk'){
+    fly.phase+=Math.abs(d)*.35;
+    const wob=Math.sin(fly.phase)*bw*.35,nx=-Math.sin(fly.th),ny=Math.cos(fly.th);
+    const bx=fly.x+nx*wob,by=fly.y+ny*wob;
+    const vn=cl(Math.abs(v)/.2);
+    const a=P.pal==='ink'?cl(.25+M.walk/80,.25,.9):.62;
+    if(Math.hypot(bx-fly.bx,by-fly.by)>.05)seg(fly.bx,fly.by,bx,by,bw*(1.1+1.6*(1-vn)),brushColor('walk'),a);
+    fly.bx=bx;fly.by=by;
+  }else if(beh==='back'){
+    if(Math.abs(d)>.05)smudge(ox,oy,fly.x,fly.y,3+bw*1.6);
+    fly.bx=fly.x;fly.by=fly.y;
+  }else if(beh==='groom'){
+    const c=P.pal==='beh'?pal.verm:(fly.load>.05?fly.lc:brushColor('groom'));
+    for(let i=0;i<2;i++){const a=Math.random()*6.283,rr=Math.random()*(5+bw*2.5);
+      dab(fly.x+Math.cos(a)*rr,fly.y+Math.sin(a)*rr,1+bw*(.5+Math.random()*.8),c,.1+fly.load*.35)}
+    fly.load*=Math.pow(.985,steps/16);fly.bx=fly.x;fly.by=fly.y;
+  }else if(beh==='feed'){
+    const hx=fly.x+Math.cos(fly.th)*9,hy=fly.y+Math.sin(fly.th)*9;
+    dab(hx,hy,3+bw,pal.bg,.12);
+    addBlob(sugar,hx,hy,22,-.05*steps/16);fly.sat=cl(fly.sat+.02*steps/16);fly.bx=fly.x;fly.by=fly.y;
+  }else{fly.bx=fly.x;fly.by=fly.y}
+}
+
+// ---------- Overlay ----------
+function drawStim(){
+  if(stimDirty){const img=sc.createImageData(SW,SH),d=img.data;
+    for(let k=0;k<SW*SH;k++){const s=sugar[k],b=bitter[k];
+      if(s>=b){d[k*4]=255;d[k*4+1]=158;d[k*4+2]=199;d[k*4+3]=Math.min(255,s*150)}
+      else{d[k*4]=138;d[k*4+1]=92;d[k*4+2]=255;d[k*4+3]=Math.min(255,b*150)}}
+    sc.putImageData(img,0,0);stimDirty=false}
+  oc.imageSmoothingEnabled=true;oc.drawImage(stimC,0,0,W,H);
+}
+function drawFlying(){
+  const f=fly,t=performance.now();oc.save();
+  oc.save();oc.translate(f.x+26,f.y+34);oc.rotate(f.th);oc.fillStyle='rgba(20,20,26,.18)';oc.beginPath();oc.ellipse(0,0,15,7,0,0,Math.PI*2);oc.fill();oc.restore();
+  oc.translate(f.x,f.y);oc.rotate(f.th);oc.scale(3.4,3.4);
+  for(const sg of[-1,1]){oc.save();oc.rotate(Math.PI/2*sg+Math.sin(t*.9)*.35*sg);oc.fillStyle='rgba(200,200,205,.28)';oc.beginPath();oc.ellipse(5,0,7,3.4,0,0,Math.PI*2);oc.fill();oc.restore()}
+  oc.fillStyle='#24211e';oc.beginPath();oc.ellipse(-5,0,5.5,3.4,0,0,Math.PI*2);oc.fill();
+  oc.beginPath();oc.ellipse(0,0,3.6,3.2,0,0,Math.PI*2);oc.fill();oc.beginPath();oc.arc(4.6,0,2.6,0,Math.PI*2);oc.fill();
+  oc.fillStyle='#8e2418';for(const sg of[-1,1]){oc.beginPath();oc.arc(5.1,sg*1.9,1.5,0,Math.PI*2);oc.fill()}
+  oc.restore();
+}
+function drawFly(){
+  if(fly.beh==='away')return;
+  if(fly.fl)return drawFlying();
+  const f=fly,beh=f.beh;oc.save();oc.translate(f.x,f.y);oc.rotate(f.th);oc.scale(2.4,2.4);
+  const bone='rgba(233,228,216,.9)';
+  oc.lineWidth=.9;oc.strokeStyle=bone;
+  // legs (tripod gait, front legs rub while grooming)
+  const ph=beh==='groom'?performance.now()*.03:f.phase;
+  const base=[[3,.9],[0,1.6],[-3,2.2]];
+  for(let i=0;i<3;i++)for(const sg of[-1,1]){
+    let a=base[i][1]+(Math.sin(ph+(i%2?Math.PI:0)+(sg>0?Math.PI:0))*.25);
+    let len=i===2?9:7.5;
+    if(beh==='groom'&&i===0){a=.35+Math.sin(ph*1.7)*.25;len=6}
+    oc.beginPath();oc.moveTo(base[i][0],0);oc.lineTo(base[i][0]+Math.cos(a)*len*.6,sg*Math.sin(a)*len*.6);
+    oc.lineTo(base[i][0]+Math.cos(a)*len,sg*(Math.sin(a)*len+1.5));oc.stroke()}
+  // wings
+  const spread=beh==='jump'?.9:.18;
+  for(const sg of[-1,1]){oc.save();oc.rotate(Math.PI+sg*spread);oc.beginPath();oc.ellipse(8,0,9,3.2,0,0,Math.PI*2);
+    oc.fillStyle='rgba(233,228,216,.16)';oc.fill();oc.strokeStyle='rgba(233,228,216,.45)';oc.stroke();oc.restore()}
+  oc.fillStyle='#2a2622';oc.strokeStyle=bone;
+  oc.beginPath();oc.ellipse(-6,0,6.5,4,0,0,Math.PI*2);oc.fill();oc.stroke();
+  oc.beginPath();oc.ellipse(0,0,4,3.6,0,0,Math.PI*2);oc.fillStyle='#3a332a';oc.fill();oc.stroke();
+  oc.beginPath();oc.arc(5.2,0,2.9,0,Math.PI*2);oc.fillStyle='#2a2622';oc.fill();oc.stroke();
+  oc.fillStyle='#ff3b1f';for(const sg of[-1,1]){oc.beginPath();oc.arc(5.8,sg*2.2,1.7,0,Math.PI*2);oc.fill()}
+  if(beh==='feed'){oc.strokeStyle='#e8b33a';oc.lineWidth=1.2;oc.beginPath();oc.moveTo(8,0);oc.lineTo(11.5,0);oc.stroke()}
+  oc.restore();
+}
+function drawOverlay(){
+  oc.clearRect(0,0,W,H);drawStim();
+  for(const s of shadows){const gr=oc.createRadialGradient(s.x,s.y,s.r*.2,s.x,s.y,s.r);gr.addColorStop(0,`rgba(20,20,26,${s.a*.35})`);gr.addColorStop(1,'rgba(20,20,26,0)');
+    oc.fillStyle=gr;oc.beginPath();oc.arc(s.x,s.y,s.r,0,Math.PI*2);oc.fill()}
+  oc.globalAlpha=1;
+  if(obsOn()){drawObsTitle(oc);const st=OBS.stop;
+    if(st&&st.dot){oc.save();oc.fillStyle=rgb(PAL.obs.green);oc.globalAlpha=.55;oc.font=`${LBL}px ${OBS_FONT}`;oc.fillText(fmtDur(OBS.clock-st.t0),st.x+10,st.y+5);oc.restore()}}
+  if(P.show)drawFly();
+}
+function updateShadows(){for(let i=shadows.length-1;i>=0;i--){const s=shadows[i];if(s.amb)continue;
+  if(s.hold)s.r=Math.min(320,s.r+9);else{s.a-=.05;if(s.a<=0)shadows.splice(i,1)}}}
+
+// ---------- Panels ----------
+const eyeC=document.getElementById('eye'),ec=eyeC.getContext('2d');
+function drawEye(){
+  ec.fillStyle='#f6f5f0';ec.fillRect(0,0,300,136);const sz=6.6;
+  for(let s=0;s<2;s++){const cx=s?225:75,cy=68;
+    for(let k=0;k<61;k++){const c=HEX[k],hx=cx+(s?-1:1)*sz*Math.sqrt(3)*(c.q+c.r/2),hy=cy-sz*1.5*c.r;
+      const g=eyeLum[s][k]*255|0;ec.beginPath();
+      for(let j=0;j<6;j++){const a=Math.PI/6+j*Math.PI/3;ec.lineTo(hx+Math.cos(a)*sz*.96,hy+Math.sin(a)*sz*.96)}
+      ec.closePath();ec.fillStyle=`rgb(${g},${g},${g})`;ec.fill();ec.strokeStyle='rgba(30,33,66,.22)';ec.lineWidth=1;ec.stroke();
+      const act=Math.min(1,eyeDark[s][k]*6);if(act>.2){ec.strokeStyle=`rgba(63,143,60,${act})`;ec.lineWidth=1.5;ec.stroke()}}}
+  ec.fillStyle='#6f7a6c';ec.font='11px Helvetica, Arial, sans-serif';ec.fillText('L',6,130);ec.fillText('R',286,130);
+}
+let RROW=18;const rast=document.getElementById('raster'),rc=rast.getContext('2d');let rastCol=null;
+function drawRaster(){
+  const Hh=rast.height;rc.drawImage(rast,-1,0);
+  if(!rastCol||rastCol.height!==Hh)rastCol=rc.createImageData(1,Hh);
+  const d=rastCol.data;d.fill(0);for(let y=0;y<Hh;y++){d[y*4]=246;d[y*4+1]=245;d[y*4+2]=240;d[y*4+3]=255}
+  for(let i=0;i<B.N;i++)if(B.spk[i]){const y=Math.min(Hh-1,i/RROW|0),c=NT_COL[B.nt[i]];d[y*4]=c[0];d[y*4+1]=c[1];d[y*4+2]=c[2]}
+  rc.putImageData(rastCol,rast.width-1,0);
+}
+const meterEls={};
+function buildMeters(){
+  const mk=(host,keys)=>{host.innerHTML='';for(const[k,label,col]of keys){const r=document.createElement('div');r.className='meter';
+    r.innerHTML=`<span>${label}</span><span class="t"><span style="background:${col}"></span></span><span class="v">0</span>`;host.appendChild(r);
+    meterEls[k]={bar:r.querySelector('.t span'),val:r.querySelector('.v')}}};
+  mk(document.getElementById('meters'),[['walk',T('m_walk'),'var(--fg)'],['turn',T('m_turn'),'var(--fg)'],['back',T('m_back'),'var(--fg)'],
+    ['grm',T('m_groom'),'var(--verm)'],['fdg',T('m_feed'),'var(--sugar)'],['gf',T('m_gf'),'var(--verm)'],['load',T('m_load'),'var(--gold)'],['sat',T('m_sat'),'var(--sugar)']]);
+  mk(document.getElementById('chem'),NT_NAMES.map((n,i)=>['nt'+i,n,rgb(NT_COL[i])]));
+  document.getElementById('legend').innerHTML=NT_NAMES.map((n,i)=>`<span><i style="background:${rgb(NT_COL[i])}"></i>${n}</span>`).join('');
+}
+function setMeter(k,val,max,txt){const m=meterEls[k];if(!m)return;m.bar.style.width=(cl(Math.abs(val)/max)*100).toFixed(1)+'%';m.val.textContent=txt??(val|0)}
+function drawMeters(){
+  setMeter('walk',M.walk,80);setMeter('turn',M.turn,60,(M.turn>0?'R ':M.turn<0?'L ':'')+Math.abs(M.turn|0));
+  setMeter('back',M.back,80);setMeter('grm',M.grm,60);setMeter('fdg',M.fdg,120);setMeter('gf',M.gf,200);
+  setMeter('load',fly.load,1,(fly.load*100|0)+'%');setMeter('sat',fly.sat,1,(fly.sat*100|0)+'%');
+  for(let i=0;i<6;i++)setMeter('nt'+i,chem[i],i<3?20:CHEM_K[i]*2,chem[i].toFixed(1));
+  const bk={walk:'b_walk',back:'b_back',groom:'b_groom',feed:'b_feed',jump:'b_jump',fly:'b_fly',away:'b_away',idle:'b_idle'}[fly.beh];
+  document.getElementById('beh').textContent=T(bk);
+}
+
+const typesEl=document.getElementById('types');
+function drawTypes(){
+  const sum=new Map();
+  for(let i=SENSORY_END;i<NR;i++){const r=B.recent[i];if(r>.05){const t=R_TY[i];sum.set(t,(sum.get(t)||0)+r)}}
+  const top=[...sum.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
+  typesEl.innerHTML=top.map(([t,v])=>`<span><b>${C.types[t]}</b><em>${v.toFixed(1)}</em></span>`).join('');
+}
+
+// ---------- Loop ----------
+let lastSteps=16,msPerStep=1,frameN=0,fpsT=performance.now(),fps=60,fpsN=0,rtf=0,simT0=0;
+function tick(){
+  // whole brain: keep each frame under ~30 ms; the status line shows the resulting fraction of real time
+  const steps=Math.max(2,Math.min(Math.round(16*P.speed),Math.floor(30*P.speed/Math.max(.05,msPerStep))));
+  lastSteps=steps;updateLow();sense();B.spk.fill(0);B.ntSpk.fill(0);const tS=performance.now();
+  const nAmp=.06*P.noise;
+  for(let s=0;s<steps;s++)simStep(B,nAmp);
+  msPerStep+=((performance.now()-tS)/steps-msPerStep)*.1;
+  for(let i=0;i<6;i++){const hz=B.ntSpk[i]/B.ntCount[i]/steps*1000;chem[i]+=(hz-chem[i])*.15}
+  for(let i=0;i<B.N;i++)B.recent[i]=B.recent[i]*.9+B.spk[i];
+  ambient(steps);act(steps);simMs+=steps;frameN++;
+  if(frameN%12===0)updateOdor();
+}
+let lastLoopT=performance.now();
+function loop(){
+  const nowT=performance.now();if(running)OBS.clock+=Math.min(100,nowT-lastLoopT);lastLoopT=nowT;
+  if(running)tick();
+  updateShadows();drawOverlay();
+  if(running){drawRaster();drawEye();if(frameN%3===0)drawMeters();if(frameN%15===0)drawTypes()}
+  fpsN++;const now=performance.now();if(now-fpsT>1000){fps=fpsN*1000/(now-fpsT);rtf=(simMs-simT0)/(now-fpsT);simT0=simMs;fpsN=0;fpsT=now;drawStatus()}
+  requestAnimationFrame(loop);
+}
+function drawStatus(){if(!B)return;document.getElementById('status').innerHTML=
+  `<span><b>${NR.toLocaleString()}</b> ${T('neurons')} ${T('real')} + <b>${B.N-NR}</b> ${T('synth')}</span><span><b>${C.nedges.toLocaleString()}</b> ${T('synapses')}</span><span>t <b>${(simMs/1000).toFixed(1)}s</b> (×${rtf.toFixed(2)})</span><span><b>${fps|0}</b> ${T('fps')}</span><span>#<b>${B.seed}</b></span>`;
+  document.getElementById('ncount').textContent=`FlyWire v783 · osoa`}
+
+// ---------- Input ----------
+function setRunning(r){running=r;const b=document.getElementById('run');b.classList.toggle('on',r);b.querySelector('[data-i]').textContent=T(r?'pause':'play')}
+document.getElementById('run').addEventListener('click',()=>setRunning(!running));
+let clearArm=0;
+document.getElementById('clear').addEventListener('click',e=>{const b=e.currentTarget;
+  if(clearArm&&performance.now()-clearArm<2500){clearPaint();sugar.fill(0);bitter.fill(0);odor.fill(0);stimDirty=true;fly.load=0;clearArm=0;b.classList.remove('warn');b.textContent=T('clear')}
+  else{clearArm=performance.now();b.classList.add('warn');b.textContent=T('confirm');setTimeout(()=>{if(clearArm&&performance.now()-clearArm>=2500){clearArm=0;b.classList.remove('warn');b.textContent=T('clear')}},2600)}});
+function toggleShow(){P.show=!P.show;document.getElementById('show').classList.toggle('on',P.show)}
+document.getElementById('show').addEventListener('click',toggleShow);
+document.getElementById('export').addEventListener('click',()=>{
+  const ex=document.createElement('canvas');ex.width=W;ex.height=H;const xc=ex.getContext('2d');xc.drawImage(paint,0,0);
+  if(obsOn()){if(OBS.stop&&OBS.stop.dot)obsStopEnd();xc.drawImage(paint,0,0);drawObsTitle(xc)}
+  const url=ex.toDataURL('image/png');document.getElementById('m-img').src=url;
+  const a=document.getElementById('m-dl');a.href=url;a.download=`eulia_${B.seed}_${Date.now()}.png`;document.getElementById('modal').hidden=false});
+document.getElementById('m-close').addEventListener('click',()=>{document.getElementById('modal').hidden=true});
+const bind=(id,key,fmt,fn)=>{const el=document.getElementById('p-'+id),o=document.getElementById('o-'+id);
+  const up=()=>{P[key]=+el.value;if(o)o.textContent=fmt(P[key]);fn&&fn()};el.addEventListener('input',up);up()};
+bind('speed','speed',v=>v+'×');bind('brush','brush',v=>String(v));bind('photo','photo',v=>v.toFixed(1));bind('noise','noise',v=>v.toFixed(1));
+// ---- sheet size: a new sheet means a new observation ----
+function resizeWorld(w,h){
+  W=Math.round(cl(w,600,2400)/8)*8;H=Math.round(cl(h,600,2400)/8)*8;LW=W/DS;LH=H/DS;SW=W/SG;SH=H/SG;
+  paint.width=ovl.width=W;paint.height=ovl.height=H;low.width=LW;low.height=LH;stimC.width=SW;stimC.height=SH;
+  sugar=new Float32Array(SW*SH);bitter=new Float32Array(SW*SH);odor=new Float32Array(SW*SH);stimDirty=true;
+  document.getElementById('stage').style.setProperty('--ar',(W/H).toFixed(4));
+  document.getElementById('p-w').value=W;document.getElementById('p-h').value=H;
+  layoutTitle();clearPaint();shadows.length=0;fly.load=0;if(B)startFlight('enter');
+}
+const sizeSel=document.getElementById('p-size');
+sizeSel.addEventListener('change',()=>{document.getElementById('custom-size').hidden=sizeSel.value!=='custom'});
+document.getElementById('size-apply').addEventListener('click',()=>{
+  const v=sizeSel.value==='custom'?[+document.getElementById('p-w').value,+document.getElementById('p-h').value]:sizeSel.value.split('x').map(Number);
+  resizeWorld(v[0],v[1])});
+document.getElementById('newbrain').addEventListener('click',()=>{const s=document.getElementById('p-seed');
+  const v=(Math.random()*999998|0)+1;s.value=v;B=buildBrain(v);drawStatus()});
+document.getElementById('p-seed').addEventListener('change',e=>{const v=cl(Math.round(+e.target.value)||1,1,999999);e.target.value=v;B=buildBrain(v);drawStatus()});
+['eu','es','en'].forEach(l=>document.getElementById('lang-'+l).addEventListener('click',()=>{LANG=l;applyLang();drawStatus()}));
+window.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;
+  if(e.code==='Space'){e.preventDefault();setRunning(!running)}
+  else if(e.key==='h'||e.key==='H')toggleShow();
+  else if(e.key==='Escape')document.getElementById('modal').hidden=true});
+
+// ---------- Boot ----------
+const LD={eu:['Garuna kargatzen','Garuna deskonprimatzen','Konexioak prestatzen','Ezin izan da garuna kargatu'],es:['Cargando el cerebro','Descomprimiendo el cerebro','Preparando las conexiones','No se pudo cargar el cerebro'],en:['Loading the brain','Decompressing the brain','Preparing the connections','Could not load the brain']};
+(async()=>{
+try{
+await loadBrain(p=>{document.getElementById('ld-bar').style.width=(p*100).toFixed(0)+'%';document.getElementById('ld-t').textContent=LD[LANG][p<.6?0:p<.9?1:2]});
+}catch(err){document.getElementById('ld-t').textContent=LD[LANG][3];document.getElementById('ld-s').textContent=String(err.message||err);return}
+await new Promise(r=>setTimeout(r,30));
+B=buildBrain(778);resizeWorld(1272,1800);
+// a starting scene: three sugar drops so the fly has something to want
+startFlight('enter');
+applyLang();drawStatus();
+rast.height=Math.ceil(B.N/RROW);
+window.__eulia={tick,fly,M,chem,P,get B(){return B},C,sugar,bitter,shadows,addBlob,setRunning,rate:idx=>rateOf(B,idx),updateOdor,both,setGain:(o)=>{if(o.bout!=null)BOUT_EXT=o.bout;if(o.loom!=null)LOOM_GAIN=o.loom;if(o.jo!=null)JO_GAIN=o.jo;if(o.obj!=null)OBJ_GAIN=o.obj;if(o.mot!=null)MOT_GAIN=o.mot;if(o.wide!=null)WIDE_GAIN=o.wide}};
+document.getElementById('loading').hidden=true;
+requestAnimationFrame(loop);
+})();
+</script>
+
+</html>
