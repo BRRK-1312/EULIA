@@ -539,6 +539,7 @@ function drawObsTitle(ctx){const a=OBS.start,b=new Date(),L=titleLines(LANG,a,b)
   ctx.save();ctx.fillStyle=rgb(PAL.obs.green);ctx.textBaseline='alphabetic';ctx.font=`${TU}px ${OBS_FONT}`;const u=TU;
   const pos=[[W*.03,H-3.9*u],[W*.47,H-2.7*u],[W*.13,H-1.6*u],[W*.43,H-.5*u]];
   L.forEach((ln,i)=>ctx.fillText(ln,pos[i][0],pos[i][1]));
+  ctx.save();ctx.textAlign='right';ctx.font=`${Math.round(u*.62)}px ${OBS_FONT}`;ctx.fillText('B_RR_K_',W*.97,H-.5*u);ctx.restore();   // signature, bottom-right corner
   const sf=Math.max(10,Math.round(u*.37));ctx.font=`italic ${sf}px ${OBS_FONT}`;const words=subLine(LANG,a,b).split(' ');let line='',y=H-3.9*u+sf*1.35;const sx=W*.03+u*.25;
   for(const w of words){const tst=line?line+' '+w:w;if(ctx.measureText(tst).width>W*.4){ctx.fillText(line,sx,y);y+=sf*1.2;line=w}else line=tst}
   if(line)ctx.fillText(line,sx,y);ctx.restore()}
