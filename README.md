@@ -41,7 +41,7 @@ Walter Marchettiren *Observación de los movimientos de una mosca sobre el crist
 | `index.html` | Orri osoa · la página completa · the whole page |
 | `brain.0.txt` … `brain.3.txt` | Konektoma (gzip, base64, 4 zati) · conectoma · connectome |
 
-Nabigatzaile moderno bat behar da (`DecompressionStream`), eta ~200 MB memoria. Garun osoa kamera geldoan bizi da (×0,3–0,5 denbora erreala, ordenagailuaren arabera).
+Nabigatzaile moderno bat behar da (`DecompressionStream`, WebAssembly), eta ~200 MB memoria. Garun osoa WebAssembly-n exekutatzen da, denbora errealetik gertu (egoera-barrak ×1 inguru erakusten du; WebAssembly ez badago, JavaScript-era itzultzen da).
 
 ## Kredituak · Créditos · Credits
 
