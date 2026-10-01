@@ -537,7 +537,7 @@ function obsSeg(x0,y0,x1,y1){const len=Math.hypot(x1-x0,y1-y0);if(len<.05)return
   pc.setLineDash([5+bw*3,3+bw*2]);pc.lineDashOffset=OBS.dash;pc.beginPath();pc.moveTo(x0,y0);pc.lineTo(x1,y1);pc.stroke();pc.restore();OBS.dash+=len}
 function obsStopTick(){const st=OBS.stop;
   if(!st){OBS.stop={x:fly.x,y:fly.y,t0:OBS.clock,dot:false,tag:''};return}
-  if(!st.dot&&OBS.clock-st.t0>=2500){st.dot=true;pc.fillStyle=rgb(PAL.obs.dot);pc.beginPath();pc.arc(st.x,st.y,3.5+P.brush,0,Math.PI*2);pc.fill()}}
+  if(!st.dot&&OBS.clock-st.t0>=1000){st.dot=true;pc.fillStyle=rgb(PAL.obs.dot);pc.beginPath();pc.arc(st.x,st.y,3.5+P.brush,0,Math.PI*2);pc.fill()}}
 function obsStopEnd(){const st=OBS.stop;OBS.stop=null;if(!st||!st.dot)return;
   const txt=fmtDur(OBS.clock-st.t0);pc.save();pc.font=`${LBL}px ${OBS_FONT}`;const w=pc.measureText(txt).width;
   pc.font=`italic 11px ${OBS_FONT}`;const wt=st.tag?pc.measureText(st.tag).width+5:0;const tw=w+wt,th=LBL,r=5+P.brush;
