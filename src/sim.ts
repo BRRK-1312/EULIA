@@ -61,7 +61,7 @@ export function step(noise: f32, nsteps: i32): void {
       if (gi0 == 0 && vi == 0 && a == 0) { store<f32>(pG + o4, 0); continue; }
       if (a != 0) { a *= ADR; if (a < 1e-3) a = 0; store<f32>(pAD + o4, a); }
       if (gi0 < 1e-5 && gi0 > -1e-5 && vi < 1e-5 && vi > -1e-5 && a == 0) { store<f32>(pG + o4, 0); store<f32>(pV + o4, 0); continue; }
-      vi += 0.05 * (gi0 - ADCR * a - vi);
+      vi += 0.05 * (gi0 - load<f32>(pADC + o4) * a - vi);   // per-neuron adaptation (stronger in the antennal lobe)
       let gi = gi0 * GDR;
       if (vi >= 1) { vi = 0; gi = 0; store<u8>(pREF + i, 2); store<i32>(pFIRED + (<usize>nf << 2), i); nf++; }
       store<f32>(pV + o4, vi); store<f32>(pG + o4, gi);
